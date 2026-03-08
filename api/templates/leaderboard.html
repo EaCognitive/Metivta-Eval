@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - Metivta Eval</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #131419;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .watermark {
+            position: fixed;
+            top: 5vh;
+            right: 5vw;
+            color: #3a3a3f;
+            font-size: clamp(12px, 1.5vw, 16px);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-weight: 500;
+            z-index: 0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            width: 90%;
+            padding: clamp(25px, 4vw, 35px);
+            background: #131419;
+            border-radius: 10px;
+            box-shadow: -5px -5px 10px rgba(255, 255, 255, 0.05),
+                5px 5px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: clamp(20px, 3vh, 25px);
+            position: relative;
+        }
+        
+        .lang-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #131419;
+            border: none;
+            color: #03a9f4;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            box-shadow: -2px -2px 6px rgba(255, 255, 255, 0.05),
+                2px 2px 6px rgba(0, 0, 0, 0.8);
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .lang-toggle:hover {
+            color: #00ff88;
+        }
+        
+        .lang-toggle:active {
+            box-shadow: inset -2px -2px 6px rgba(255, 255, 255, 0.05),
+                inset 2px 2px 6px rgba(0, 0, 0, 0.8);
+        }
+        
+        body[dir="rtl"] .lang-toggle {
+            right: auto;
+            left: 0;
+        }
+        
+        body[dir="rtl"] .refresh-indicator {
+            left: auto;
+            right: 29px;
+        }
+        
+        body[dir="rtl"] .watermark {
+            right: auto;
+            left: 5vw;
+        }
+        
+        body[dir="rtl"] table {
+            direction: rtl;
+        }
+        
+        /* Keep numbers and scores in LTR even in RTL mode */
+        body[dir="rtl"] .score,
+        body[dir="rtl"] .rank,
+        body[dir="rtl"] .timestamp {
+            direction: ltr;
+            text-align: center;
+        }
+        
+        body[dir="rtl"] th {
+            text-align: right;
+        }
+        
+        body[dir="rtl"] td {
+            text-align: right;
+        }
+        
+        body[dir="rtl"] td.score,
+        body[dir="rtl"] td.rank,
+        body[dir="rtl"] td.timestamp {
+            text-align: center;
+        }
+        
+        body[dir="rtl"] .rank {
+            text-align: center;
+        }
+        
+        .logo {
+            max-width: clamp(80px, 12vw, 140px);
+            height: auto;
+            margin: 0 auto 15px;
+            display: block;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+            opacity: 0.85;
+            object-fit: contain;
+        }
+        
+        h1 {
+            color: #c7c7c7;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: clamp(18px, 2.5vw, 24px);
+            margin-bottom: 8px;
+        }
+        
+        .emoji {
+            color: #00ff88;
+            margin-right: 8px;
+            font-size: 0.9em;
+        }
+        
+        .subtitle {
+            color: #00ff88;
+            font-size: clamp(10px, 1.2vw, 12px);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            opacity: 0.5;
+        }
+        
+        .table-container {
+            background: #131419;
+            border-radius: 10px;
+            box-shadow: inset -2px -2px 6px rgba(255, 255, 255, 0.05),
+                inset 2px 2px 6px rgba(0, 0, 0, 0.8);
+            padding: 2px;
+            max-height: 65vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        #content {
+            overflow-x: auto !important;
+            overflow-y: auto !important;
+            max-height: 100% !important;
+            flex: 1;
+            min-height: 0;
+        }
+
+        #content.loading {
+            padding: clamp(40px, 6vh, 60px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #131419;
+        }
+        
+        th {
+            color: #03a9f4;
+            padding: clamp(10px, 1.5vh, 15px) clamp(8px, 1vw, 12px);
+            text-align: left;
+            font-weight: 500;
+            font-size: clamp(10px, 1.1vw, 11px);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid rgba(3, 169, 244, 0.2);
+            position: sticky;
+            top: 0;
+            background: #131419;
+            z-index: 10;
+        }
+        
+        th.highlight {
+            color: #00ff88;
+            font-weight: 600;
+        }
+        
+        td {
+            color: #868686;
+            padding: clamp(8px, 1.2vh, 12px) clamp(8px, 1vw, 12px);
+            font-size: clamp(11px, 1.3vw, 13px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        
+        tbody tr {
+            transition: all 0.3s;
+        }
+        
+        tbody tr:hover {
+            background: rgba(3, 169, 244, 0.05);
+        }
+        
+        .rank {
+            font-weight: 600;
+            color: #00ff88;
+            text-align: center;
+            width: 60px;
+        }
+        
+        .rank-1 { color: #ffd700; }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+        
+        .system-name {
+            color: #03a9f4;
+            font-weight: 500;
+        }
+        
+        .score {
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            color: #c7c7c7;
+        }
+        
+        .score.highlight {
+            color: #00ff88;
+            font-weight: 600;
+            background: rgba(0, 255, 136, 0.05);
+            border-radius: 4px;
+        }
+        
+        .timestamp {
+            color: #555;
+            font-size: clamp(10px, 1.2vw, 12px);
+        }
+        
+        .loading {
+            text-align: center;
+            color: #868686;
+            font-size: clamp(12px, 1.5vw, 14px);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+        
+        .error {
+            text-align: center;
+            padding: clamp(40px, 6vh, 60px);
+            color: #ff0047;
+            font-size: clamp(12px, 1.5vw, 14px);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(3, 169, 244, 0.1);
+            border-top-color: #03a9f4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            margin-top: clamp(20px, 3vh, 30px);
+            text-align: center;
+            color: #777;
+            font-size: clamp(10px, 1.2vw, 12px);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: #00ff88;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ff88;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
+            }
+            50% {
+                box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+            }
+            100% {
+                box-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
+            }
+        }
+        
+        .refresh-indicator {
+            position: fixed;
+            top: 20px;
+            left: 29px;
+            color: #00ff88;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        .refresh-indicator.show {
+            opacity: 0.6;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: clamp(15px, 3vw, 25px);
+            }
+            
+            th, td {
+                padding: clamp(6px, 1vh, 8px) clamp(4px, 0.5vw, 6px);
+                font-size: clamp(10px, 1.2vw, 12px);
+            }
+            
+            .hide-mobile {
+                display: none;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .container {
+                padding: clamp(15px, 3vw, 25px);
+            }
+        }
+    </style>
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+    <div class="refresh-indicator" id="refreshIndicator" data-translate="refreshing" style="position: fixed; top: 20px; left: 29px; z-index: 9999;">Refreshing...</div>
+
+    <div class="container" style="margin: auto !important; max-width: 1400px; display: flex; flex-direction: column; gap: 20px;">
+        <div class="header" style="margin-bottom: 0;">
+            <button class="lang-toggle" onclick="toggleLanguage()">עב / EN</button>
+            <img src="/static/logo.png" alt="Metivta Eval Logo" class="logo">
+            <h1><span class="emoji">🏆</span><span data-translate="title">Public Leaderboard</span></h1>
+            <div class="subtitle" data-translate="subtitle">The Open Torah - AI Evaluation Benchmark</div>
+        </div>
+
+        <div class="table-container" style="max-height: 65vh; overflow: hidden; display: flex; flex-direction: column;">
+            <div id="content" class="loading" style="overflow-x: auto; overflow-y: auto; max-height: 100%; flex: 1; min-height: 0;">
+                <div class="loading-spinner"></div>
+                <span data-translate="loading">Loading leaderboard data...</span>
+            </div>
+        </div>
+
+        <div class="footer" style="margin-top: 0;">
+            <div class="pulse-dot"></div>
+            <span data-translate="autoRefresh">Auto-refreshes every 30 seconds</span>
+        </div>
+    </div>
+    
+    <script>
+        let isFirstLoad = true;
+        let currentLanguage = 'en';
+        const initialSubmissions = {{ initial_submissions | default([], true) | tojson }};
+        let cachedSubmissions = Array.isArray(initialSubmissions) ? initialSubmissions : [];
+        
+        // Translation dictionary
+        const translations = {
+            en: {
+                watermark: 'Metivta Eval',
+                refreshing: 'Refreshing...',
+                title: 'Public Leaderboard',
+                subtitle: 'The Open Torah - AI Evaluation Benchmark',
+                loading: 'Loading leaderboard data...',
+                autoRefresh: 'Auto-refreshes every 30 seconds',
+                noSubmissions: 'No submissions yet',
+                rank: 'Rank',
+                system: 'System',
+                author: 'Author',
+                daatScore: 'DAAT Score',
+                correctness: 'Correctness',
+                hebrew: 'Hebrew',
+                urlFormat: 'URL Format',
+                length: 'Length',
+                scholarly: 'Scholarly',
+                webValid: 'Web Valid',
+                submitted: 'Submitted'
+            },
+            he: {
+                watermark: 'מתיבתא איוול',
+                refreshing: 'מרענן...',
+                title: 'לוח התוצאות',
+                subtitle: 'התורה הפתוחה - מדד הערכת AI',
+                loading: 'טוען נתוני לוח תוצאות...',
+                autoRefresh: 'מתעדכן אוטומטית כל 30 שניות',
+                noSubmissions: 'אין הגשות עדיין',
+                rank: 'דירוג',
+                system: 'מערכת',
+                author: 'מחבר',
+                daatScore: 'ציון דעת',
+                correctness: 'דיוק',
+                hebrew: 'עברית',
+                urlFormat: 'פורמט URL',
+                length: 'אורך',
+                scholarly: 'אקדמי',
+                webValid: 'אימות רשת',
+                submitted: 'הוגש'
+            }
+        };
+        
+        // Initialize language from localStorage or browser
+        function initLanguage() {
+            const saved = localStorage.getItem('leaderboardLang');
+            if (saved) {
+                currentLanguage = saved;
+            } else {
+                // Auto-detect browser language
+                const browserLang = navigator.language || navigator.userLanguage;
+                currentLanguage = browserLang.startsWith('he') ? 'he' : 'en';
+            }
+            applyLanguage();
+        }
+        
+        // Toggle between languages
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'he' : 'en';
+            localStorage.setItem('leaderboardLang', currentLanguage);
+            applyLanguage();
+            loadLeaderboard(cachedSubmissions); // Re-render with current data
+        }
+        
+        // Apply language to all elements
+        function applyLanguage() {
+            // Set RTL direction for Hebrew
+            document.body.dir = currentLanguage === 'he' ? 'rtl' : 'ltr';
+
+            // Translate all elements with data-translate attribute
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+        }
+
+        // Convert number to Hebrew numeral
+        function toHebrewNumeral(num) {
+            const hebrewNumerals = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט',
+                                     'י', 'יא', 'יב', 'יג', 'יד', 'טו', 'טז', 'יז', 'יח', 'יט',
+                                     'כ'];
+            return num <= 20 ? hebrewNumerals[num] : num.toString();
+        }
+        
+        async function loadLeaderboard(preloadedSubmissions = null) {
+            const refreshIndicator = document.getElementById('refreshIndicator');
+            
+            if (!isFirstLoad) {
+                refreshIndicator.classList.add('show');
+            }
+            
+            try {
+                let submissions = preloadedSubmissions;
+                if (submissions === null) {
+                    const response = await fetch('/leaderboard', {
+                        headers: {'Accept': 'application/json'}
+                    });
+                    const data = await response.json();
+
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    submissions = data.submissions || [];
+                }
+                cachedSubmissions = Array.isArray(submissions) ? submissions : [];
+                
+                // Sort by DAAT score
+                const sorted = [...cachedSubmissions].sort((a, b) => 
+                    (b.scores?.daat_score || 0) - (a.scores?.daat_score || 0)
+                );
+                
+                if (sorted.length === 0) {
+                    document.getElementById('content').innerHTML = 
+                        `<div class="loading">${translations[currentLanguage].noSubmissions}</div>`;
+                    return;
+                }
+                
+                const t = translations[currentLanguage];
+                let html = '<table><thead><tr>';
+                html += `<th class="rank">${t.rank}</th>`;
+                html += `<th>${t.system}</th>`;
+                html += `<th>${t.author}</th>`;
+                html += `<th class="highlight">${t.daatScore}</th>`;
+                html += `<th class="hide-mobile">${t.correctness}</th>`;
+                html += `<th class="hide-mobile">${t.hebrew}</th>`;
+                html += `<th class="hide-mobile">${t.urlFormat}</th>`;
+                html += `<th class="hide-mobile">${t.length}</th>`;
+                html += `<th class="hide-mobile">${t.scholarly}</th>`;
+                html += `<th class="hide-mobile">${t.webValid}</th>`;
+                html += `<th>${t.submitted}</th>`;
+                html += '</tr></thead><tbody>';
+                
+                sorted.forEach((entry, i) => {
+                    const scores = entry.scores || {};
+                    const rank = i + 1;
+                    let rankClass = 'rank';
+                    if (rank === 1) rankClass += ' rank-1';
+                    else if (rank === 2) rankClass += ' rank-2';
+                    else if (rank === 3) rankClass += ' rank-3';
+                    
+                    const systemName = currentLanguage === 'he' ? (entry.system_he || entry.system) : entry.system;
+                    const authorName = currentLanguage === 'he' ? (entry.author_he || entry.author) : entry.author;
+                    const rankDisplay = currentLanguage === 'he' ? toHebrewNumeral(rank) : rank;
+
+                    html += '<tr>';
+                    html += `<td class="${rankClass}">${rankDisplay}</td>`;
+                    html += `<td class="system-name">${systemName || 'N/A'}</td>`;
+                    html += `<td>${authorName || 'N/A'}</td>`;
+                    html += `<td class="score highlight">${(scores.daat_score || 0).toFixed(3)}</td>`;
+                    html += `<td class="score hide-mobile">${(scores.correctness || 0).toFixed(3)}</td>`;
+                    html += `<td class="score hide-mobile">${(scores.hebrew_presence || 0).toFixed(3)}</td>`;
+                    html += `<td class="score hide-mobile">${(scores.url_format || 0).toFixed(3)}</td>`;
+                    html += `<td class="score hide-mobile">${(scores.response_length || 0).toFixed(3)}</td>`;
+                    html += `<td class="score hide-mobile">${(scores.scholarly_format || 0).toFixed(3)}</td>`;
+                    html += `<td class="score hide-mobile">${(scores.web_validation || 0).toFixed(3)}</td>`;
+                    
+                    const date = new Date(entry.timestamp);
+                    const locale = currentLanguage === 'he' ? 'he-IL' : 'en-US';
+                    const dateStr = date.toLocaleDateString(locale, {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    html += `<td class="timestamp">${dateStr}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('content').innerHTML = html;
+                document.getElementById('content').classList.remove('loading');
+                
+                isFirstLoad = false;
+                
+            } catch (error) {
+                document.getElementById('content').innerHTML = 
+                    `<div class="error">Error loading leaderboard: ${error.message}</div>`;
+                document.getElementById('content').classList.remove('loading');
+            } finally {
+                setTimeout(() => {
+                    refreshIndicator.classList.remove('show');
+                }, 500);
+            }
+        }
+        
+        // Initialize language on page load
+        initLanguage();
+        
+        // Load leaderboard
+        loadLeaderboard(cachedSubmissions.length ? cachedSubmissions : null);
+        
+        // Refresh every 30 seconds
+        setInterval(loadLeaderboard, 30000);
+    </script>
+</body>
+</html>

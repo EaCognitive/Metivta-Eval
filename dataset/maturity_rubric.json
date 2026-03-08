@@ -1,0 +1,96 @@
+{
+  "scoring_rubric": {
+    "description": "A scoring system based on the Digital Humanities Maturity Model, designed to objectively measure the scholarly sophistication of a response. Scores are cumulative, based on the presence of verifiable features.",
+    "feature_groups": [
+      {
+        "group_name": "Level 1: Digital Archive Features (Preservation & Access)",
+        "points_possible": 1.0,
+        "features": [
+          {
+            "feature_id": "L1_MACHINE_READABLE",
+            "description": "The primary text is machine-readable (i.e., not an image or non-selectable PDF).",
+            "points": 0.5
+          },
+          {
+            "feature_id": "L1_STANDARD_TEXT",
+            "description": "The response identifies a single, standard base text for its answer (e.g., Vilna Shas, Tanakh JPS 1985).",
+            "points": 0.5
+          }
+        ]
+      },
+      {
+        "group_name": "Level 2: Interlinked Library Features (Connection & Discovery)",
+        "points_possible": 2.0,
+        "features": [
+          {
+            "feature_id": "L2_HYPERLINKED_COMMENTARY",
+            "description": "The response includes at least one hyperlink connecting the primary text to a commentary or related source.",
+            "points": 1.0
+          },
+          {
+            "feature_id": "L2_API_ACCESSIBLE",
+            "description": "The response provides a link to a documented API where the source text and its connections can be retrieved.",
+            "points": 1.0
+          }
+        ]
+      },
+      {
+        "group_name": "Level 3: Scholarly Digital Edition Features (Critical Analysis & Context)",
+        "points_possible": 3.0,
+        "features": [
+          {
+            "feature_id": "L3_MULTIPLE_WITNESSES",
+            "description": "The response cites or links to more than one textual witness or manuscript (e.g., mentions both Leningrad Codex and Aleppo Codex).",
+            "points": 1.5
+          },
+          {
+            "feature_id": "L3_CRITICAL_APPARATUS",
+            "description": "The response explicitly notes a textual variant and presents it in a structured way (e.g., 'Ketiv/Qere', 'alternative reading in manuscript X').",
+            "points": 1.0
+          },
+          {
+            "feature_id": "L3_LINGUISTIC_TOOL_INTEGRATION",
+            "description": "The response links a specific word to a lexicon, morphological analysis, or dictionary entry.",
+            "points": 0.5
+          }
+        ]
+      },
+      {
+        "group_name": "Level 4: Integrated Research Environment Features (Computational Inquiry)",
+        "points_possible": 4.0,
+        "features": [
+          {
+            "feature_id": "L4_COMPUTATIONAL_ANALYSIS",
+            "description": "The response includes output from a computational tool (e.g., network analysis of characters, topic model of a chapter, stylometric data).",
+            "points": 2.0
+          },
+          {
+            "feature_id": "L4_TRANSPARENT_METHODOLOGY",
+            "description": "The response links to open-source code, a research paper, or detailed documentation explaining the methods used for its analysis.",
+            "points": 2.0
+          }
+        ]
+      }
+    ]
+  },
+  "evaluation_examples": [
+    {
+      "example_name": "Level 1 Example Response",
+      "score": 1.0,
+      "response": "The source for this is Talmud Bavli, Berakhot 2a (Vilna Edition). The text states: 'מאימתי קורין את שמע בערבית...'",
+      "features_present": ["L1_MACHINE_READABLE", "L1_STANDARD_TEXT"]
+    },
+    {
+      "example_name": "Level 2 Example Response",
+      "score": 3.0,
+      "response": "In Berakhot 2a, the text states 'מאימתי...'. Rashi's commentary on this phrase is available here: [link to Sefaria Rashi]. The full text can be accessed via the Sefaria API: [link to API docs].",
+      "features_present": ["L1_MACHINE_READABLE", "L1_STANDARD_TEXT", "L2_HYPERLINKED_COMMENTARY", "L2_API_ACCESSIBLE"]
+    },
+    {
+      "example_name": "Level 3 Example Response",
+      "score": 6.5,
+      "response": "In Berakhot 2a (based on the Vilna printing), the text states '...דברי רבי אליעzer'. However, the Munich manuscript reads 'רבי אליעזר בן הורקנוס' [link to manuscript viewer]. The word 'אליעzer' is a proper noun meaning 'My God is help' [link to lexicon]. All data is available via our API [link].",
+      "features_present": ["L1_MACHINE_READABLE", "L1_STANDARD_TEXT", "L2_API_ACCESSIBLE", "L3_MULTIPLE_WITNESSES", "L3_CRITICAL_APPARATUS", "L3_LINGUISTIC_TOOL_INTEGRATION"]
+    }
+  ]
+}

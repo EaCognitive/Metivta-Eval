@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metivta Eval API - Interactive Documentation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #e8eaf0;
+            min-height: 100vh;
+            color: #2c3e50;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .wrapper {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            background: #e8eaf0;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 24px;
+            box-shadow: 20px 20px 40px #c5c7cc,
+                        -20px -20px 40px #ffffff;
+            text-align: center;
+        }
+        
+        .logo-container {
+            margin-bottom: 0px;
+        }
+        
+        .logo {
+            max-width: 125px;
+            height: auto;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+        
+        .info-section {
+            background: #e8eaf0;
+            padding: 30px;
+            margin-bottom: 40px;
+            border-radius: 20px;
+            box-shadow: inset 8px 8px 16px #c5c7cc,
+                        inset -8px -8px 16px #ffffff;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .info-card {
+            background: #e8eaf0;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 8px 8px 16px #c5c7cc,
+                        -8px -8px 16px #ffffff;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100px;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 10px 10px 20px #c5c7cc,
+                        -10px -10px 20px #ffffff;
+        }
+        
+        .info-card h3 {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-card .card-value {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .info-card code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #059669;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+        }
+        
+        .endpoints-container {
+            margin-top: 40px;
+        }
+        
+        .endpoint-group {
+            margin-bottom: 30px;
+        }
+        
+        .endpoint-group-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 2px solid #d1d5db;
+        }
+        
+        .endpoint {
+            background: #e8eaf0;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 8px 8px 16px #c5c7cc,
+                        -8px -8px 16px #ffffff;
+        }
+        
+        .endpoint-header {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+        
+        .endpoint-header:hover {
+            background: #dfe2e7;
+        }
+        
+        .method {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: #e8eaf0;
+            box-shadow: inset 2px 2px 4px #c5c7cc,
+                        inset -2px -2px 4px #ffffff;
+            text-transform: uppercase;
+        }
+        
+        .method.get { color: #059669; }
+        .method.post { color: #7c3aed; }
+        .method.put { color: #ea580c; }
+        .method.delete { color: #dc2626; }
+        
+        .endpoint-path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .endpoint-summary {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        
+        .endpoint-body {
+            padding: 0 20px 20px;
+            display: none;
+        }
+        
+        .endpoint.expanded .endpoint-body {
+            display: block;
+        }
+        
+        .endpoint-description {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .params-section, .request-section, .response-section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .param-item {
+            background: #e8eaf0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: inset 2px 2px 4px #c5c7cc,
+                        inset -2px -2px 4px #ffffff;
+        }
+        
+        .param-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .param-required {
+            color: #ef4444;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .param-type {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-left: 8px;
+        }
+        
+        .param-description {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        
+        .code-block {
+            background: #e8eaf0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: inset 3px 3px 6px #c5c7cc,
+                        inset -3px -3px 6px #ffffff;
+            margin-bottom: 10px;
+            overflow-x: auto;
+        }
+        
+        .code-block pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .try-button {
+            color: #2c3e50;
+            padding: 0.5em 1.2em;
+            font-size: 0.85rem;
+            border-radius: 0.5em;
+            background: #e8eaf0;
+            cursor: pointer;
+            border: 1px solid #e8eaf0;
+            transition: all 0.3s;
+            box-shadow: 6px 6px 12px #c5c7cc,
+                        -6px -6px 12px #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+        
+        .try-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 8px 8px 16px #c5c7cc,
+                        -8px -8px 16px #ffffff;
+        }
+        
+        .try-button:active {
+            color: #666;
+            transform: translateY(0);
+            box-shadow: inset 4px 4px 12px #c5c7cc,
+                        inset -4px -4px 12px #ffffff;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .badge.auth {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .expand-icon {
+            font-size: 1.2rem;
+            color: #64748b;
+            transition: transform 0.3s;
+        }
+        
+        .endpoint.expanded .expand-icon {
+            transform: rotate(90deg);
+        }
+        
+        .download-button {
+            display: inline-block;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 24px;
+            font-size: 0.9rem;
+            border-radius: 12px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            text-decoration: none;
+            margin: 15px 0;
+        }
+        
+        .download-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .download-button:active {
+            transform: translateY(0);
+        }
+        
+        .important-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="header">
+            <div class="logo-container">
+                <img src="/docs/logo.png" alt="Metivta Eval" class="logo">
+            </div>
+            <h1>API Documentation</h1>
+            <p class="subtitle">Clean, simple API reference for Metivta Eval</p>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Base URL</h3>
+                    <div class="card-value">
+                        <code>metivta-eval.onrender.com</code>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3>Authentication</h3>
+                    <div class="card-value">
+                        <code>Bearer Token</code>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3>Header Format</h3>
+                    <div class="card-value">
+                        <code>Bearer mtv_xxx...</code>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h3>Rate Limit</h3>
+                    <div class="card-value">
+                        <code>10 req/hour</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="endpoints-container">
+            <!-- Core Endpoints -->
+            <div class="endpoint-group">
+                <h2 class="endpoint-group-title">Core</h2>
+                
+                <div class="endpoint" onclick="toggleEndpoint(this)">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/</span>
+                        <span class="endpoint-summary">Health Check</span>
+                        <span class="expand-icon">›</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p class="endpoint-description">Check if the API service is running and healthy</p>
+                        <div class="response-section">
+                            <h4 class="section-title">Response</h4>
+                            <div class="code-block">
+                                <pre>{
+  "status": "healthy",
+  "service": "Metivta Eval - The Open Torah"
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="endpoint" onclick="toggleEndpoint(this)">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/dataset-info</span>
+                        <span class="endpoint-summary">Get Dataset Information</span>
+                        <span class="expand-icon">›</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p class="endpoint-description">Retrieve information about the evaluation dataset</p>
+                        <div class="response-section">
+                            <h4 class="section-title">Response</h4>
+                            <div class="code-block">
+                                <pre>{
+  "dataset_size": 100,
+  "categories": ["Halacha", "Tanach", "Talmud"],
+  "description": "Curated Torah Q&A dataset"
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="endpoint" onclick="toggleEndpoint(this)">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/questions</span>
+                        <span class="endpoint-summary">Get Evaluation Questions</span>
+                        <span class="expand-icon">›</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p class="endpoint-description">Retrieve all evaluation questions that your endpoint must answer</p>
+                        <div class="response-section">
+                            <h4 class="section-title">Response</h4>
+                            <div class="code-block">
+                                <pre>{
+  "questions": [
+    {
+      "id": 1,
+      "question": "What is the source for lighting Shabbat candles?"
+    },
+    {
+      "id": 2,
+      "question": "What are the requirements for a kosher mezuzah?"
+    },
+    {
+      "id": 3,
+      "question": "Explain the concept of Tikkun Olam in Jewish thought"
+    }
+  ],
+  "total": 100
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Authentication -->
+            <div class="endpoint-group">
+                <h2 class="endpoint-group-title">Authentication</h2>
+                
+                <div class="endpoint" onclick="toggleEndpoint(this)">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-path">/register</span>
+                        <span class="endpoint-summary">Register New User</span>
+                        <span class="expand-icon">›</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p class="endpoint-description">Register a new user and receive an API key</p>
+                        <div class="request-section">
+                            <h4 class="section-title">Request Body</h4>
+                            <div class="param-item">
+                                <span class="param-name">email</span>
+                                <span class="param-required">REQUIRED</span>
+                                <span class="param-type">string</span>
+                                <div class="param-description">Your email address</div>
+                            </div>
+                            <div class="param-item">
+                                <span class="param-name">name</span>
+                                <span class="param-required">REQUIRED</span>
+                                <span class="param-type">string</span>
+                                <div class="param-description">Your name</div>
+                            </div>
+                            <div class="param-item">
+                                <span class="param-name">organization</span>
+                                <span class="param-type">string</span>
+                                <div class="param-description">Your organization (optional)</div>
+                            </div>
+                        </div>
+                        <div class="response-section">
+                            <h4 class="section-title">Response</h4>
+                            <div class="code-block">
+                                <pre>{
+  "message": "Registration successful!",
+  "api_key": "mtv_xxx_xxxxxxxxxx",
+  "key_prefix": "mtv_xxx"
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Evaluation -->
+            <div class="endpoint-group">
+                <h2 class="endpoint-group-title">Evaluation</h2>
+                
+                <div class="endpoint" onclick="toggleEndpoint(this)">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-path">/validate-endpoint</span>
+                        <span class="endpoint-summary">Validate Submission Endpoint</span>
+                        <span class="expand-icon">›</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p class="endpoint-description">Validate that your endpoint properly responds to dataset questions</p>
+                        <div class="request-section">
+                            <h4 class="section-title">Request Body</h4>
+                            <div class="param-item">
+                                <span class="param-name">endpoint_url</span>
+                                <span class="param-required">REQUIRED</span>
+                                <span class="param-type">string</span>
+                                <div class="param-description">Your API endpoint URL</div>
+                            </div>
+                        </div>
+                        <div class="response-section">
+                            <h4 class="section-title">Response</h4>
+                            <div class="code-block">
+                                <pre>{
+  "valid": true,
+  "message": "Endpoint validated successfully for 100 questions"
+}</pre>
+                            </div>
+                        </div>
+                        <div class="important-box">
+                            <h4 class="section-title" style="color: #667eea;">📝 How It Works</h4>
+                            <p class="endpoint-description" style="margin-bottom: 15px;"><strong>When you submit your endpoint URL to /submit, we will:</strong></p>
+                            <ol style="font-size: 0.85rem; color: #64748b; margin-left: 20px; margin-bottom: 15px;">
+                                <li>Call your endpoint 100 times (once for each evaluation question)</li>
+                                <li>Send a POST request with a question</li>
+                                <li>Expect a JSON response with an answer</li>
+                                <li>Evaluate your answers using all evaluators</li>
+                                <li>Return your scores and update the leaderboard</li>
+                            </ol>
+                            
+                            <h4 class="section-title" style="color: #059669; margin-top: 20px;">✅ Your Endpoint Must:</h4>
+                            <p class="endpoint-description">Accept POST requests with this format:</p>
+                            <div class="code-block">
+                                <pre>{
+  "question": "What is the source for lighting Shabbat candles?"
+}</pre>
+                            </div>
+                            <p class="endpoint-description">And return responses in this format:</p>
+                            <div class="code-block">
+                                <pre>{
+  "answer": "The obligation to light Shabbat candles is derived from the Talmud..."
+}</pre>
+                            </div>
+                            
+                            <a href="submit_sample.json" download="endpoint_sample.json" class="download-button">
+                                📥 Download Complete Sample
+                            </a>
+                            
+                            <p class="endpoint-description" style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px;">
+                                <strong>Tips for better scores:</strong> Include Hebrew text, cite sources, provide comprehensive answers
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="endpoint" onclick="toggleEndpoint(this)">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <span class="endpoint-path">/submit</span>
+                        <span class="endpoint-summary">Submit Evaluation Run</span>
+                        <span class="badge auth">AUTH</span>
+                        <span class="expand-icon">›</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p class="endpoint-description">Submit your Torah Q&A endpoint for comprehensive evaluation of ALL 100 questions</p>
+                        
+                        <div class="code-block" style="margin-bottom: 20px;">
+                            <h4 class="section-title" style="color: #667eea; margin-bottom: 10px;">How Submission Works</h4>
+                            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">The evaluation process is fully automated. You submit your endpoint URL once, and we handle the rest.</p>
+                            <div style="font-size: 0.8rem; color: #2c3e50; line-height: 1.6;">
+                                <p style="margin-bottom: 8px;"><strong>Step 1:</strong> You submit your endpoint URL via POST request</p>
+                                <p style="margin-bottom: 8px;"><strong>Step 2:</strong> Our system automatically queries your endpoint 100 times</p>
+                                <p style="margin-bottom: 8px;"><strong>Step 3:</strong> Each query contains a single question in JSON format</p>
+                                <p style="margin-bottom: 8px;"><strong>Step 4:</strong> Your endpoint returns an answer for each question</p>
+                                <p style="margin-bottom: 8px;"><strong>Step 5:</strong> All responses are evaluated using our evaluators</p>
+                                <p style="margin-bottom: 8px;"><strong>Step 6:</strong> Aggregate scores are calculated and returned immediately</p>
+                            </div>
+                            <p style="margin-top: 12px; font-size: 0.75rem; color: #cf0e0e;">
+                                The entire evaluation runs synchronously. Your submission request will complete once all 100 questions have been processed.
+                            </p>
+                        </div>
+                        
+                        <div class="request-section">
+                            <h4 class="section-title">What YOU Submit (One-time submission)</h4>
+                            <div class="code-block">
+                                <pre>POST https://metivta-eval.onrender.com/submit
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+
+{
+  "author": "Your Name",
+  "system_name": "Your System Name",
+  "endpoint_url": "https://your-api.com/answer"
+}</pre>
+                            </div>
+                            
+                            <h4 class="section-title" style="margin-top: 20px;">Request Parameters</h4>
+                            <div class="param-item">
+                                <span class="param-name">author</span>
+                                <span class="param-required">REQUIRED</span>
+                                <span class="param-type">string</span>
+                                <div class="param-description">Your name or team name</div>
+                            </div>
+                            <div class="param-item">
+                                <span class="param-name">system_name</span>
+                                <span class="param-required">REQUIRED</span>
+                                <span class="param-type">string</span>
+                                <div class="param-description">Name of your system</div>
+                            </div>
+                            <div class="param-item">
+                                <span class="param-name">endpoint_url</span>
+                                <span class="param-required">REQUIRED</span>
+                                <span class="param-type">string</span>
+                                <div class="param-description">Your API endpoint URL that will answer all 100 questions</div>
+                            </div>
+                        </div>
+                        <div class="response-section">
+                            <h4 class="section-title">Response (All Evaluator Scores)</h4>
+                            <div class="code-block">
+                                <pre>{
+  "message": "Submission successful! Leaderboard updated.",
+  "scores": {
+    "correctness": 0.82,
+    "daat_score": 0.85,
+    "hebrew_presence": 0.92,
+    "response_length": 0.88,
+    "scholarly_format": 0.78,
+    "url_format": 0.95,
+    "web_validation": 0.90
+  }
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Results -->
+            <div class="endpoint-group">
+                <h2 class="endpoint-group-title">Results</h2>
+                
+                <div class="endpoint" onclick="toggleEndpoint(this)">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/leaderboard</span>
+                        <span class="endpoint-summary">Get Leaderboard</span>
+                        <span class="expand-icon">›</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p class="endpoint-description">Retrieve current leaderboard data</p>
+                        <div class="response-section">
+                            <h4 class="section-title">Response</h4>
+                            <div class="code-block">
+                                <pre>{
+  "submissions": [
+    {
+      "rank": 1,
+      "author": "Rabbi Cohen",
+      "system_name": "Metivta AI System",
+      "scores": {
+        "daat_score": 0.89,
+        "correctness": 0.85,
+        "scholarly_format": 0.82
+      },
+      "total_score": 0.85,
+      "timestamp": "2024-01-12T10:30:00Z"
+    }
+  ]
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleEndpoint(element) {
+            element.classList.toggle('expanded');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+services:
+  - type: web
+    name: metivta-flask
+    runtime: python
+    buildCommand: "uv sync --frozen --no-dev && uv pip install -e ."
+    startCommand: "uv run gunicorn --bind 0.0.0.0:$PORT --timeout 300 --workers 2 api.wsgi:app"
+    envVars:
+      - key: METIVTA_META_ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LANGCHAIN_API_KEY
+        sync: false
+      - key: METIVTA_SECURITY_SECRET_KEY
+        sync: false
+
+  - type: web
+    name: metivta-fastapi
+    runtime: python
+    buildCommand: "uv sync --frozen --no-dev && uv pip install -e ."
+    startCommand: "PYTHONPATH=src:. uv run uvicorn api.fastapi_app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: METIVTA_META_ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LANGCHAIN_API_KEY
+        sync: false
+      - key: METIVTA_SECURITY_SECRET_KEY
+        sync: false
+
+  - type: worker
+    name: metivta-worker
+    runtime: python
+    buildCommand: "uv sync --frozen --no-dev && uv pip install -e ."
+    startCommand: "uv run celery -A api.workers.celery_app.celery_app worker --loglevel=info --concurrency=2"
+    envVars:
+      - key: METIVTA_META_ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LANGCHAIN_API_KEY
+        sync: false
+      - key: METIVTA_SECURITY_SECRET_KEY
+        sync: false
+      - key: METIVTA_WORKER_BROKER
+        sync: false
+      - key: METIVTA_WORKER_RESULT_BACKEND
+        sync: false

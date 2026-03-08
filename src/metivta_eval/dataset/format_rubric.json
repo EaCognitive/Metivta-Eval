@@ -1,0 +1,28 @@
+{
+  "perfect_example": {
+    "description": "Exemplifies perfect Torah scholarship format: Primary source, Hebrew text with translation, commentary, different opinions, practical conclusion, and a verifiable URL.",
+    "response": "תלמוד בבלי, ברכות ב ע״א:\n\"מאימתי קורין את שמע בערבית? משעה שהכהנים נכנסים לאכול בתרומתן עד סוף האשמורה הראשונה, דברי רבי אליעזר.\"\n(From when do we recite the Shema in the evening? From the time when the priests enter to eat their terumah until the end of the first watch, these are the words of Rabbi Eliezer.)\n\nרש״י שם ד״ה משעה שהכהנים:\n\"משעה שהכהנים נכנסים - כהנים שנטמאו וטבלו, דכתיב (ויקרא כב:ז) 'ובא השמש וטהר ואחר יאכל מן הקדשים', משתשקע החמה.\"\n\nלהלכה (Practical law): The Shulchan Aruch (אורח חיים רלה:ג) rules that one should recite Shema before midnight.\n\nSource: https://www.sefaria.org/Berakhot.2a"
+  },
+  "minimal_but_correct_example": {
+    "description": "A minimal but correct answer, typical of the Q1 dataset. Contains the core Hebrew text and a direct source link.",
+    "response": "כשהבנים מתנהגים בדרך התורה וייטיבו מעשיהם, אז גם אביהם ייטיב דרכו ויתקן מעשיו עוד יותר.\n\nhttps://tashma.co.il/books/learn/19079/דברי_יואל_על_התורה/דברים/פרשת_ראה/ג?line=42--דברים-פרשת+ראה-ג"
+  },
+  "scoring_rubric": {
+    "1.0": "Perfectly matches the 'perfect_example' format. Comprehensive, well-structured, and fully cited.",
+    "0.8": "A strong, scholarly response with minor formatting issues or lacking one structural element.",
+    "0.6": "A correct answer that resembles the 'minimal_but_correct_example'. It is accurate but not comprehensive.",
+    "0.3": "Contains some correct information but lacks clear sources, structure, or Hebrew text.",
+    "0.0": "Incorrect, irrelevant, or contains no scholarly elements."
+  },
+  "structural_elements": {
+    "required": [
+      "A direct answer to the question.",
+      "At least one specific source citation (textual or URL)."
+    ],
+    "optional_but_valuable": [
+      "Original Hebrew/Aramaic text.",
+      "Translation or explanation of the source.",
+      "Additional commentary or perspectives."
+    ]
+  }
+}

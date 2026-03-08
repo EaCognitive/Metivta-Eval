@@ -1,0 +1,100 @@
+---
+title: Configuration
+description: Configuration model and override rules used by the current codebase
+---
+
+# Configuration
+
+MetivitaEval uses `config.toml` as the canonical configuration source.
+
+Environment variables override file values.
+
+## Resolution Order
+
+1. Environment variables
+2. `config.toml`
+3. Built-in defaults from `src/metivta_eval/config/toml_config.py`
+
+## Environment Variable Pattern
+
+Variables map to nested keys using `METIVTA_` prefixes.
+
+Examples:
+
+- `METIVTA_SERVER_PORT` -> `server.port`
+- `METIVTA_SERVER_FASTAPI_PORT` -> `server.fastapi_port`
+- `METIVTA_DATABASE_POSTGRESQL_HOST` -> `database.postgresql.host`
+- `METIVTA_SECURITY_SECRET_KEY` -> `security.secret_key`
+
+Direct DB URL shortcuts are also supported by persistence code:
+
+- `METIVTA_DATABASE_URL`
+- `DATABASE_URL`
+
+## High-Impact Sections
+
+### `meta`
+
+- `version`
+- `environment` (`development|staging|production`)
+
+### `server`
+
+- `host`, `port`
+- `gateway_port`, `fastapi_port`
+- `workers`, `timeout_seconds`
+- `server.cors.*`
+
+### `security`
+
+- `secret_key`
+- `security.jwt.*`
+- `security.rate_limiting.*`
+- `security.api_keys.*`
+- optional `security.mtls.*`
+
+### `database`
+
+- `provider` (`postgresql|supabase|sqlite`)
+- `database.postgresql.*`
+- `database.supabase.*`
+- `database.migrations.*`
+
+### `evaluation`
+
+- `target` (`endpoint|anthropic|ground_truth|mock`)
+- `endpoint_url`
+- `dev_mode`
+- `evaluation.daat.weights.*`
+- `evaluation.mteb.metrics`
+- `evaluation.web_validator.*`
+
+### `dataset`
+
+- `name`, `version`, `local_path`
+- `dataset.files.*`
+- `dataset.mteb.*`
+
+### `observability`
+
+- `observability.logging.*`
+- `observability.tracing.*`
+- `observability.metrics.*`
+
+### `worker`
+
+- Celery settings: broker, result backend, concurrency
+- queue names under `worker.queues`
+
+## CLI Behavior
+
+CLI reads config from:
+
+- `--config <path>` when provided
+- otherwise default search locations (`.` / `~/.metivta` / `~/.config/metivta`)
+
+## Operational Recommendation
+
+- Keep secrets out of `config.toml` in production.
+- Set sensitive values through environment variables or secret managers.
+- Commit only safe defaults and templates.

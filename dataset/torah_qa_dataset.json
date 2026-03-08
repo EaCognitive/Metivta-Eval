@@ -1,0 +1,110 @@
+[
+    {
+        "inputs": {"question": "What is the primary purpose of the Shema prayer?"},
+        "outputs": {"answer": "The Shema is Judaism's central declaration of faith, proclaiming the oneness of God. It serves as a twice-daily affirmation of monotheism and acceptance of divine sovereignty, traditionally recited in the morning and evening prayers."}
+    },
+    {
+        "inputs": {"question": "How many commandments (mitzvot) are there in the Torah?"},
+        "outputs": {"answer": "There are 613 commandments in the Torah, consisting of 248 positive commandments (mitzvot aseh) and 365 negative commandments (mitzvot lo ta'aseh)."}
+    },
+    {
+        "inputs": {"question": "What is the significance of the number seven in Jewish tradition?"},
+        "outputs": {"answer": "Seven represents completion and holiness in Judaism, seen in the seven days of Creation, Shabbat as the seventh day, the seven weeks of counting the Omer, seven branches of the Menorah, and many other religious observances."}
+    },
+    {
+        "inputs": {"question": "What are the three pilgrimage festivals (Shalosh Regalim)?"},
+        "outputs": {"answer": "The three pilgrimage festivals are Pesach (Passover), Shavuot (Feast of Weeks), and Sukkot (Feast of Tabernacles), during which Jews historically made pilgrimages to the Temple in Jerusalem."}
+    },
+    {
+        "inputs": {"question": "What is the purpose of mezuzah on doorposts?"},
+        "outputs": {"answer": "The mezuzah fulfills the biblical commandment to inscribe God's words on doorposts, serving as a reminder of faith and divine protection. It contains the Shema prayer written on parchment and sanctifies the Jewish home."}
+    },
+    {
+        "inputs": {"question": "What are the four species used during Sukkot?"},
+        "outputs": {"answer": "The four species (arba minim) are the lulav (palm branch), etrog (citron), hadassim (myrtle branches), and aravot (willow branches), which are held together and waved during Sukkot prayers."}
+    },
+    {
+        "inputs": {"question": "What is the spiritual significance of teshuvah (repentance)?"},
+        "outputs": {"answer": "Teshuvah represents the Jewish concept of return to God through sincere repentance. It involves recognizing wrongdoing, feeling remorse, making amends, and resolving not to repeat the transgression, emphasizing that spiritual growth and redemption are always possible."}
+    },
+    {
+        "inputs": {"question": "What are the three parts of the Hebrew Bible (Tanakh)?"},
+        "outputs": {"answer": "The Tanakh consists of Torah (Five Books of Moses), Nevi'im (Prophets), and Ketuvim (Writings), forming the acronym TaNaKh from their Hebrew initials."}
+    },
+    {
+        "inputs": {"question": "What is the significance of the Sabbatical year (Shemitah)?"},
+        "outputs": {"answer": "Shemitah occurs every seventh year when agricultural land in Israel must lie fallow, debts are forgiven, and the land returns to God. It teaches faith, social equality, and environmental stewardship."}
+    },
+    {
+        "inputs": {"question": "What is the role of a minyan in Jewish prayer?"},
+        "outputs": {"answer": "A minyan is a quorum of ten adult Jews required for certain communal prayers and religious obligations, including the recitation of Kaddish, Torah reading, and the repetition of the Amidah."}
+    },
+    {
+        "inputs": {"question": "What are the key differences between the Written Torah and Oral Torah?"},
+        "outputs": {"answer": "The Written Torah (Torah Shebichtav) comprises the Five Books of Moses, while the Oral Torah (Torah Shebe'al Peh) includes rabbinic interpretations, laws, and traditions later codified in the Talmud, providing practical application of biblical commandments."}
+    },
+    {
+        "inputs": {"question": "What is the purpose of wearing tefillin during prayer?"},
+        "outputs": {"answer": "Tefillin are worn to fulfill the commandment to bind God's words as a sign upon the hand and head, symbolizing the dedication of thoughts and actions to divine service during weekday morning prayers."}
+    },
+    {
+        "inputs": {"question": "What are the main themes of the High Holy Days?"},
+        "outputs": {"answer": "The High Holy Days (Rosh Hashanah and Yom Kippur) focus on judgment, repentance, and renewal. They emphasize introspection, seeking forgiveness, and the opportunity for spiritual rebirth through teshuvah, tefillah, and tzedakah."}
+    },
+    {
+        "inputs": {"question": "What is the significance of the Jubilee year (Yovel)?"},
+        "outputs": {"answer": "The Jubilee year occurs every 50 years, when slaves are freed, land returns to original owners, and social equality is restored. It represents ultimate redemption and the cyclical nature of freedom in Jewish thought."}
+    },
+    {
+        "inputs": {"question": "What are the essential components of a kosher kitchen?"},
+        "outputs": {"answer": "A kosher kitchen requires separation of meat and dairy products, including separate sets of dishes, utensils, and cooking surfaces. It must also exclude non-kosher foods and maintain proper supervision of food preparation according to Jewish dietary laws."}
+    },
+    {
+        "inputs": {"question": "What is the meaning and importance of Shabbat in Jewish life?"},
+        "outputs": {"answer": "Shabbat is the weekly day of rest commemorating God's rest after Creation and the Exodus from Egypt. It provides spiritual renewal, family time, and cessation from creative work, serving as a cornerstone of Jewish identity and practice."}
+    },
+    {
+        "inputs": {"question": "What are the Four Questions asked during the Passover Seder?"},
+        "outputs": {"answer": "The Four Questions (Ma Nishtana) ask why this night differs from all others, specifically about eating matzah, bitter herbs, dipping twice, and reclining. They encourage children's participation and prompt the retelling of the Exodus story."}
+    },
+    {
+        "inputs": {"question": "What is the significance of the number 18 (chai) in Jewish culture?"},
+        "outputs": {"answer": "Eighteen (חי) spells 'chai' meaning 'life' in Hebrew gematria. It's considered auspicious, often used in charitable giving and celebrations as multiples of 18 to symbolize the blessing of life."}
+    },
+    {
+        "inputs": {"question": "What are the requirements for a valid Jewish marriage ceremony (kiddushin)?"},
+        "outputs": {"answer": "Kiddushin requires a marriage contract (ketubah), two witnesses, the groom giving something of value to the bride, blessings under the chuppah (wedding canopy), and the couple's consent, creating a sacred bond recognized by Jewish law."}
+    },
+    {
+        "inputs": {"question": "What is the purpose of saying blessings (brachot) in Jewish practice?"},
+        "outputs": {"answer": "Blessings acknowledge God as the source of all goodness and sanctify everyday actions. They transform routine activities into spiritual experiences, expressing gratitude and recognizing the divine presence in all aspects of life."}
+    },
+    {
+        "inputs": {"question": "What are the three daily prayer services in Judaism?"},
+        "outputs": {"answer": "The three daily prayers are Shacharit (morning), Mincha (afternoon), and Ma'ariv (evening), corresponding to the Temple sacrifices and established by the patriarchs Abraham, Isaac, and Jacob respectively."}
+    },
+    {
+        "inputs": {"question": "What is the concept of Tikkun Olam?"},
+        "outputs": {"answer": "Tikkun Olam means 'repairing the world' through acts of kindness, social justice, and ethical behavior. It represents the Jewish responsibility to partner with God in perfecting creation and improving society for all humanity."}
+    },
+    {
+        "inputs": {"question": "What are the seven Noahide Laws?"},
+        "outputs": {"answer": "The seven Noahide Laws are universal moral principles for all humanity: prohibitions against idolatry, blasphemy, murder, theft, sexual immorality, and eating flesh from living animals, plus the obligation to establish just legal systems."}
+    },
+    {
+        "inputs": {"question": "What is the significance of the Western Wall (Kotel)?"},
+        "outputs": {"answer": "The Western Wall is the last remnant of the Second Temple's retaining wall, Judaism's holiest prayer site. It represents the enduring connection to the Temple, Jewish continuity, and serves as a focal point for prayer and pilgrimage."}
+    },
+    {
+        "inputs": {"question": "What are the main differences between Ashkenazi and Sephardi traditions?"},
+        "outputs": {"answer": "Ashkenazi Jews originated from Central/Eastern Europe, while Sephardi Jews came from Spain/Portugal and Mediterranean regions. They differ in liturgy, Hebrew pronunciation, customs, foods, and some religious practices, though sharing core Jewish beliefs."}
+    },
+    {
+        "inputs": {"question": "What is the role of the Talmud in Jewish law?"},
+        "outputs": {"answer": "The Talmud is the authoritative record of rabbinic discussions on Jewish law, ethics, philosophy, and history. It interprets biblical law for practical application, serving as the foundation for halakha (Jewish law) and Jewish scholarship."}
+    },
+    {
+        "inputs": {"question": "What is the meaning of keeping kosher (kashrut)?"},
+        "outputs": {"answer": "Kashrut encompasses Jewish dietary laws including permitted animals, proper slaughter, separation of meat and dairy, and avoiding forbidden foods. It sanctifies eating, promotes self-discipline, and maintains Jewish identity through mindful consumption."}
+    }
+]

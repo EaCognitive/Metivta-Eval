@@ -1,0 +1,137 @@
+---
+title: API Overview
+description: Current MetivtaEval API surface (FastAPI v2 + Flask compatibility)
+---
+
+# API Overview
+
+MetivitaEval currently exposes two HTTP surfaces:
+
+- FastAPI v2 (primary): authentication, evaluation lifecycle, leaderboard, websocket updates.
+- Flask compatibility (legacy): `POST /submit` contract for backward compatibility.
+
+## Base URLs
+
+- FastAPI (local): `http://localhost:8001`
+- Flask compatibility (local): `http://localhost:8080`
+- Gateway (optional): `http://localhost:8000`
+
+## OpenAPI and Interactive Docs
+
+For the FastAPI service:
+
+- Scalar API reference: `/api/v2/docs`
+- OpenAPI JSON: `/api/v2/openapi.json`
+
+## Authentication Methods
+
+FastAPI endpoints use one of these headers:
+
+- `Authorization: Bearer <access_token>`
+- `X-API-Key: <api_key>`
+
+Flask `/submit` currently expects:
+
+- `Authorization: Bearer <api_key>`
+
+## FastAPI Endpoint Summary
+
+### Health
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Liveness check |
+| `GET` | `/ready` | Readiness/dependency check |
+| `GET` | `/` | Service metadata |
+
+### Auth (`/api/v2/auth`)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/register` | Create user account |
+| `POST` | `/login` | Login with email/password |
+| `POST` | `/refresh` | Rotate session tokens (via `X-Refresh-Token`) |
+| `GET` | `/me` | Current user profile |
+| `GET` | `/api-keys` | List API keys |
+| `POST` | `/api-keys` | Create API key |
+| `DELETE` | `/api-keys/{key_id}` | Revoke API key |
+
+### Evaluations (`/api/v2/eval`)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/` | Submit evaluation |
+| `GET` | `/` | List evaluations |
+| `GET` | `/{evaluation_id}` | Evaluation status |
+| `GET` | `/{evaluation_id}/results` | Evaluation scores/details |
+| `POST` | `/{evaluation_id}/cancel` | Cancel running evaluation |
+
+### Leaderboard (`/api/v2/leaderboard`)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/` | Ranked leaderboard |
+| `GET` | `/stats` | Aggregate statistics |
+| `GET` | `/my-rankings` | Current user's entries |
+| `GET` | `/{system_id}` | One system ranking |
+
+## WebSocket Endpoint
+
+- Endpoint: `/ws/events`
+- Query parameter: `token=<access_token>`
+
+Supported client actions/messages are implemented in `api/fastapi_app/routers/websocket.py`.
+
+## Flask Compatibility Endpoint
+
+### `POST /submit`
+
+This is preserved for existing integrators and resume portfolio continuity.
+
+Optional query parameter:
+
+- `?async=true` to enqueue evaluation and poll status later
+
+Required JSON body:
+
+```json
+{
+  "author": "Your Name",
+  "system_name": "Your System",
+  "endpoint_url": "https://your-api.example.com/answer"
+}
+```
+
+Required header:
+
+```http
+Authorization: Bearer <api_key>
+```
+
+Response shape remains backward compatible:
+
+```json
+{
+  "message": "Submission successful! Leaderboard updated.",
+  "scores": {
+    "daat_score": 0.82
+  }
+}
+```
+
+Async response shape (`/submit?async=true`):
+
+```json
+{
+  "message": "Submission accepted for async processing.",
+  "task_id": "uuid",
+  "status_url": "/status/uuid",
+  "status": "queued"
+}
+```
+
+## Notes for Integrators
+
+- New integrations should target FastAPI `/api/v2/*`.
+- Existing `/submit` clients can remain unchanged.
+- Use `METIVTA_API_BASE_URL` with the CLI to point commands at a non-default host.

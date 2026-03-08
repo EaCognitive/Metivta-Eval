@@ -1,0 +1,33 @@
+---
+title: Introduction
+description: Practical overview of the current MetivitaEval stack
+---
+
+# Introduction
+
+MetivitaEval evaluates Torah-focused systems using two modes:
+
+- DAAT mode for answer quality and attribution behavior.
+- MTEB-style mode for retrieval ranking metrics.
+
+## Current Stack
+
+- Python Flask compatibility API (`/submit`)
+- Python FastAPI v2 API (`/api/v2/*`)
+- Go CLI (`metivta`)
+- PostgreSQL canonical persistence (Supabase in production)
+- Docker Compose local parity stack
+
+## Quickstart Path
+
+1. Follow [Installation](/getting-started/installation)
+2. Start local services (or point CLI to an existing API)
+3. Run `metivta eval run --endpoint <your-endpoint>`
+4. Inspect results via CLI and `/api/v2/leaderboard`
+
+## Documentation Map
+
+- [API Overview](/api/overview)
+- [Authentication](/api/authentication)
+- [CLI Overview](/cli/overview)
+- [Configuration](/configuration/overview)

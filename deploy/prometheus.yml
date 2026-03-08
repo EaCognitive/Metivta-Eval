@@ -1,0 +1,57 @@
+# Prometheus Configuration for MetivitaEval
+# Scrapes metrics from all services
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'metivta-eval'
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - alertmanager:9093
+
+# Rule files
+rule_files:
+  # - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Go Gateway
+  - job_name: 'gateway'
+    static_configs:
+      - targets: ['gateway:9090']
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # FastAPI Service
+  - job_name: 'fastapi'
+    static_configs:
+      - targets: ['fastapi:8001']
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # Flask Legacy Service
+  - job_name: 'flask'
+    static_configs:
+      - targets: ['flask:8080']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  # PostgreSQL (via postgres_exporter if available)
+  # - job_name: 'postgres'
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']

@@ -1,0 +1,69 @@
+# OS/Editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Env/Secrets
+.env
+.env.local
+.env.*.local
+.env.supabase
+.env.supabase.local
+*.pem
+*.key
+*.pfx
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.venv/
+venv/
+ENV/
+env/
+.mypy_cache/
+.ruff_cache/
+
+# Go
+bin/
+*.test
+
+# Build Artifacts
+build/
+dist/
+htmlcov/
+playwright-report/
+test-results/
+
+# Tests/Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+
+# Local Runtime Data
+logs/
+*.log
+.langsmith/
+.notes/
+.claude/
+CLAUDE.md
+bundled_code.txt
+bundle_code.py
+plan.md
+plan2.md
+leaderboard_data.json
+api_keys.db
+*.db
+*.sqlite3
+/metivta
+
+# Private Dataset Files
+dataset/Q1-dataset.json
+src/metivta_eval/dataset/Q1-dataset.json

@@ -1,0 +1,90 @@
+# MetivitaEval Go Gateway
+# Multi-stage build for minimal production image
+#
+# Build: docker build -f deploy/Dockerfile.gateway -t metivta/gateway .
+# Run:   docker run -p 8000:8000 metivta/gateway
+
+# ============================================================================
+# STAGE 1: Build
+# ============================================================================
+FROM golang:1.25-alpine AS builder
+
+# Build arguments
+ARG VERSION=dev
+ARG COMMIT_SHA=unknown
+
+# Install build dependencies
+RUN apk add --no-cache git ca-certificates tzdata
+
+# Set working directory
+WORKDIR /build
+
+# Copy go module files first (for layer caching)
+COPY go.mod go.sum* ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+
+# Build the gateway binary
+# - CGO_ENABLED=0: Static binary, no C dependencies
+# - -ldflags: Strip debug info and embed version
+# - -trimpath: Remove file system paths from binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -ldflags="-s -w -X main.Version=${VERSION} -X main.CommitSHA=${COMMIT_SHA}" \
+    -trimpath \
+    -o /metivta-gateway \
+    ./cmd/metivta-gateway
+
+# ============================================================================
+# STAGE 2: Certificates (for mTLS)
+# ============================================================================
+FROM alpine:3.19 AS certs
+
+# Install CA certificates
+RUN apk add --no-cache ca-certificates
+
+# ============================================================================
+# STAGE 3: Production Image
+# ============================================================================
+FROM gcr.io/distroless/static-debian12:nonroot
+
+# Labels
+LABEL org.opencontainers.image.title="MetivitaEval Gateway"
+LABEL org.opencontainers.image.description="Go Fiber API Gateway for MetivitaEval"
+LABEL org.opencontainers.image.vendor="Metivta"
+LABEL org.opencontainers.image.source="https://github.com/metivta/metivta-eval"
+
+# Copy certificates
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# Copy binary
+COPY --from=builder /metivta-gateway /metivta-gateway
+
+# Copy timezone data
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+
+# Create app directory structure
+WORKDIR /app
+
+# Copy config template (will be overwritten by volume mount)
+COPY config.toml /app/config.toml
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=3 \
+    CMD ["/metivta-gateway", "--healthcheck"]
+
+# Run as non-root user (distroless nonroot = uid 65532)
+USER nonroot:nonroot
+
+# Entry point
+ENTRYPOINT ["/metivta-gateway"]
+
+# Default command (can be overridden)
+CMD []

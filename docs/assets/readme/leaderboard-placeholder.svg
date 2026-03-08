@@ -1,0 +1,32 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#F4F0E8"/>
+  <rect x="48" y="48" width="1504" height="804" rx="28" fill="#111111"/>
+  <rect x="96" y="96" width="1408" height="708" rx="20" fill="#FBF8F2"/>
+  <rect x="96" y="96" width="1408" height="96" rx="20" fill="#C8A96B"/>
+  <circle cx="146" cy="144" r="12" fill="#111111"/>
+  <circle cx="184" cy="144" r="12" fill="#111111" fill-opacity="0.7"/>
+  <circle cx="222" cy="144" r="12" fill="#111111" fill-opacity="0.45"/>
+  <text x="260" y="155" fill="#111111" font-family="Arial, sans-serif" font-size="34" font-weight="700">
+    Leaderboard Preview Placeholder
+  </text>
+  <rect x="140" y="240" width="300" height="180" rx="18" fill="#EEE5D6"/>
+  <rect x="470" y="240" width="300" height="180" rx="18" fill="#EEE5D6"/>
+  <rect x="800" y="240" width="300" height="180" rx="18" fill="#EEE5D6"/>
+  <rect x="1130" y="240" width="260" height="180" rx="18" fill="#111111"/>
+  <rect x="140" y="470" width="1250" height="260" rx="18" fill="#EEE5D6"/>
+  <rect x="180" y="520" width="1170" height="28" rx="14" fill="#D8C9AE"/>
+  <rect x="180" y="570" width="1170" height="28" rx="14" fill="#D8C9AE"/>
+  <rect x="180" y="620" width="980" height="28" rx="14" fill="#D8C9AE"/>
+  <text x="1130" y="320" fill="#FBF8F2" font-family="Arial, sans-serif" font-size="28" font-weight="700">
+    Replace with
+  </text>
+  <text x="1130" y="360" fill="#FBF8F2" font-family="Arial, sans-serif" font-size="28" font-weight="700">
+    live leaderboard
+  </text>
+  <text x="1130" y="400" fill="#FBF8F2" font-family="Arial, sans-serif" font-size="28" font-weight="700">
+    screenshot
+  </text>
+  <text x="140" y="792" fill="#5F5648" font-family="Arial, sans-serif" font-size="26">
+    Suggested capture: ranking table, score cards, and product framing above the fold.
+  </text>
+</svg>

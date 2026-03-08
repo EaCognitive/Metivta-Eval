@@ -1,0 +1,513 @@
+# MetivitaEval Docker Compose
+# Single source of truth for all services
+#
+# Usage:
+#   docker-compose up -d                    # Start all services
+#   docker-compose up -d --build            # Rebuild and start
+#   docker-compose down -v                  # Stop and remove volumes
+#   docker-compose logs -f gateway          # Follow gateway logs
+#
+# Idempotency: All services use health checks and restart policies
+# to ensure consistent state across restarts.
+
+services:
+  # ============================================================================
+  # GATEWAY - Go Fiber API Gateway
+  # ============================================================================
+  gateway:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.gateway
+      args:
+        - VERSION=${VERSION:-dev}
+    image: metivta/gateway:${VERSION:-latest}
+    container_name: metivta-gateway
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-18000}:8000"
+    environment:
+      - METIVTA_META_ENVIRONMENT=${ENVIRONMENT:-development}
+      - METIVTA_SERVER_GATEWAY_PORT=8000
+      - GATEWAY_PORT=8000
+      - FASTAPI_URL=http://fastapi:8001
+      - METIVTA_CACHE_REDIS_HOST=redis
+      - METIVTA_DATABASE_POSTGRESQL_HOST=postgres
+      - METIVTA_OBSERVABILITY_TRACING_ENDPOINT=http://jaeger:4317
+    volumes:
+      - ./config.toml:/app/config.toml:ro
+      - ./certs:/app/certs:ro
+      - gateway-logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/metivta-gateway", "--healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - metivta-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  # ============================================================================
+  # FASTAPI - Python Evaluation Service
+  # ============================================================================
+  fastapi:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.fastapi
+      args:
+        - VERSION=${VERSION:-dev}
+    image: metivta/fastapi:${VERSION:-latest}
+    container_name: metivta-fastapi
+    restart: unless-stopped
+    environment:
+      - METIVTA_META_ENVIRONMENT=${ENVIRONMENT:-development}
+      - METIVTA_SERVER_FASTAPI_PORT=8001
+      - METIVTA_DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-metivta}:${POSTGRES_PASSWORD:-metivta_secret}@postgres:5432/${POSTGRES_DB:-metivta}?sslmode=disable
+      - METIVTA_CACHE_REDIS_HOST=redis
+      - METIVTA_DATABASE_POSTGRESQL_HOST=postgres
+      - METIVTA_OBSERVABILITY_TRACING_ENDPOINT=http://jaeger:4317
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2:-false}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY:-}
+      - METIVTA_MODELS_LANGSMITH_API_KEY=${LANGCHAIN_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - METIVTA_MODELS_ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN:-}
+      - METIVTA_EVALUATION_WEB_VALIDATOR_BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN:-}
+      - METIVTA_DATASET_NAME=${METIVTA_DATASET_NAME:-}
+      - METIVTA_DATASET_VERSION=${METIVTA_DATASET_VERSION:-}
+      - METIVTA_DATASET_LOCAL_PATH=${METIVTA_DATASET_LOCAL_PATH:-}
+      - METIVTA_DATASET_FILES_QUESTIONS=${METIVTA_DATASET_FILES_QUESTIONS:-}
+      - METIVTA_DATASET_FILES_QUESTIONS_ONLY=${METIVTA_DATASET_FILES_QUESTIONS_ONLY:-}
+      - METIVTA_DATASET_FILES_FORMAT_RUBRIC=${METIVTA_DATASET_FILES_FORMAT_RUBRIC:-}
+      - METIVTA_DATASET_FILES_MATURITY_RUBRIC=${METIVTA_DATASET_FILES_MATURITY_RUBRIC:-}
+      - METIVTA_DATASET_MTEB_CORPUS=${METIVTA_DATASET_MTEB_CORPUS:-}
+      - METIVTA_DATASET_MTEB_QUERIES=${METIVTA_DATASET_MTEB_QUERIES:-}
+      - METIVTA_DATASET_MTEB_QRELS=${METIVTA_DATASET_MTEB_QRELS:-}
+      - METIVTA_EVALUATION_DAAT_ENABLED=${METIVTA_EVALUATION_DAAT_ENABLED:-}
+      - METIVTA_EVALUATION_DAAT_EVALUATORS=${METIVTA_EVALUATION_DAAT_EVALUATORS:-}
+      - METIVTA_DATASET_MAX_EXAMPLES=${METIVTA_DATASET_MAX_EXAMPLES:-}
+    volumes:
+      - ./config.toml:/app/config.toml:ro
+      - ./api:/app/api:ro
+      - ./src:/app/src:ro
+      - ./certs:/app/certs:ro
+      - fastapi-logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: ["api.fastapi_app.main:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "2"]
+    networks:
+      - metivta-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # ============================================================================
+  # FLASK - Legacy API (for migration period)
+  # ============================================================================
+  flask:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.flask
+      args:
+        - VERSION=${VERSION:-dev}
+    image: metivta/flask:${VERSION:-latest}
+    container_name: metivta-flask
+    restart: unless-stopped
+    ports:
+      - "${FLASK_PORT:-18080}:8080"
+    environment:
+      - METIVTA_META_ENVIRONMENT=${ENVIRONMENT:-development}
+      - METIVTA_SERVER_PORT=8080
+      - METIVTA_DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-metivta}:${POSTGRES_PASSWORD:-metivta_secret}@postgres:5432/${POSTGRES_DB:-metivta}?sslmode=disable
+      - METIVTA_CACHE_REDIS_HOST=redis
+      - METIVTA_DATABASE_POSTGRESQL_HOST=postgres
+      - METIVTA_WORKER_BROKER=redis://redis:6379/1
+      - METIVTA_WORKER_RESULT_BACKEND=redis://redis:6379/2
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2:-false}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY:-}
+      - METIVTA_MODELS_LANGSMITH_API_KEY=${LANGCHAIN_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - METIVTA_MODELS_ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN:-}
+      - METIVTA_EVALUATION_WEB_VALIDATOR_BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN:-}
+      - METIVTA_DATASET_NAME=${METIVTA_DATASET_NAME:-}
+      - METIVTA_DATASET_VERSION=${METIVTA_DATASET_VERSION:-}
+      - METIVTA_DATASET_LOCAL_PATH=${METIVTA_DATASET_LOCAL_PATH:-}
+      - METIVTA_DATASET_FILES_QUESTIONS=${METIVTA_DATASET_FILES_QUESTIONS:-}
+      - METIVTA_DATASET_FILES_QUESTIONS_ONLY=${METIVTA_DATASET_FILES_QUESTIONS_ONLY:-}
+      - METIVTA_DATASET_FILES_FORMAT_RUBRIC=${METIVTA_DATASET_FILES_FORMAT_RUBRIC:-}
+      - METIVTA_DATASET_FILES_MATURITY_RUBRIC=${METIVTA_DATASET_FILES_MATURITY_RUBRIC:-}
+      - METIVTA_DATASET_MTEB_CORPUS=${METIVTA_DATASET_MTEB_CORPUS:-}
+      - METIVTA_DATASET_MTEB_QUERIES=${METIVTA_DATASET_MTEB_QUERIES:-}
+      - METIVTA_DATASET_MTEB_QRELS=${METIVTA_DATASET_MTEB_QRELS:-}
+      - METIVTA_EVALUATION_DAAT_ENABLED=${METIVTA_EVALUATION_DAAT_ENABLED:-}
+      - METIVTA_EVALUATION_DAAT_EVALUATORS=${METIVTA_EVALUATION_DAAT_EVALUATORS:-}
+      - METIVTA_DATASET_MAX_EXAMPLES=${METIVTA_DATASET_MAX_EXAMPLES:-}
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY:-}
+    volumes:
+      - ./config.toml:/app/config.toml:ro
+      - ./api:/app/api:ro
+      - ./src:/app/src:ro
+      - flask-logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    command: ["--bind", "0.0.0.0:8080", "--workers", "2", "--timeout", "300", "api.wsgi:app"]
+    networks:
+      - metivta-network
+    profiles:
+      - legacy
+      - demo
+
+  # ============================================================================
+  # WORKER - Celery Background Worker
+  # ============================================================================
+  worker:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.worker
+    image: metivta/worker:${VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      - METIVTA_META_ENVIRONMENT=${ENVIRONMENT:-development}
+      - METIVTA_DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-metivta}:${POSTGRES_PASSWORD:-metivta_secret}@postgres:5432/${POSTGRES_DB:-metivta}?sslmode=disable
+      - METIVTA_WORKER_BROKER=redis://redis:6379/1
+      - METIVTA_WORKER_RESULT_BACKEND=redis://redis:6379/2
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - METIVTA_MODELS_ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY:-}
+      - METIVTA_MODELS_LANGSMITH_API_KEY=${LANGCHAIN_API_KEY:-}
+      - BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN:-}
+      - METIVTA_EVALUATION_WEB_VALIDATOR_BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN:-}
+      - METIVTA_DATASET_NAME=${METIVTA_DATASET_NAME:-}
+      - METIVTA_DATASET_VERSION=${METIVTA_DATASET_VERSION:-}
+      - METIVTA_DATASET_LOCAL_PATH=${METIVTA_DATASET_LOCAL_PATH:-}
+      - METIVTA_DATASET_FILES_QUESTIONS=${METIVTA_DATASET_FILES_QUESTIONS:-}
+      - METIVTA_DATASET_FILES_QUESTIONS_ONLY=${METIVTA_DATASET_FILES_QUESTIONS_ONLY:-}
+      - METIVTA_DATASET_FILES_FORMAT_RUBRIC=${METIVTA_DATASET_FILES_FORMAT_RUBRIC:-}
+      - METIVTA_DATASET_FILES_MATURITY_RUBRIC=${METIVTA_DATASET_FILES_MATURITY_RUBRIC:-}
+      - METIVTA_DATASET_MTEB_CORPUS=${METIVTA_DATASET_MTEB_CORPUS:-}
+      - METIVTA_DATASET_MTEB_QUERIES=${METIVTA_DATASET_MTEB_QUERIES:-}
+      - METIVTA_DATASET_MTEB_QRELS=${METIVTA_DATASET_MTEB_QRELS:-}
+      - METIVTA_EVALUATION_DAAT_ENABLED=${METIVTA_EVALUATION_DAAT_ENABLED:-}
+      - METIVTA_EVALUATION_DAAT_EVALUATORS=${METIVTA_EVALUATION_DAAT_EVALUATORS:-}
+      - METIVTA_DATASET_MAX_EXAMPLES=${METIVTA_DATASET_MAX_EXAMPLES:-}
+    volumes:
+      - ./config.toml:/app/config.toml:ro
+      - ./api:/app/api:ro
+      - ./src:/app/src:ro
+      - worker-logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - metivta-network
+    command: ["-A", "api.workers.celery_app", "worker", "--loglevel=info", "--concurrency=2"]
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  # ============================================================================
+  # DEMO ANSWER SERVICE - Deterministic dataset-backed answer API
+  # ============================================================================
+  demo-answer:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.flask
+    image: metivta/demo-answer:${VERSION:-latest}
+    container_name: metivta-demo-answer
+    restart: unless-stopped
+    entrypoint: ["python", "api/demo_answer.py"]
+    environment:
+      - METIVTA_DATASET_NAME=${METIVTA_DATASET_NAME:-}
+      - METIVTA_DATASET_VERSION=${METIVTA_DATASET_VERSION:-}
+      - METIVTA_DATASET_LOCAL_PATH=${METIVTA_DATASET_LOCAL_PATH:-}
+      - METIVTA_DATASET_FILES_QUESTIONS=${METIVTA_DATASET_FILES_QUESTIONS:-}
+      - METIVTA_DATASET_FILES_QUESTIONS_ONLY=${METIVTA_DATASET_FILES_QUESTIONS_ONLY:-}
+      - METIVTA_DATASET_MAX_EXAMPLES=${METIVTA_DATASET_MAX_EXAMPLES:-2}
+    volumes:
+      - ./config.toml:/app/config.toml:ro
+      - ./api:/app/api:ro
+      - ./src:/app/src:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - metivta-network
+    profiles:
+      - demo
+
+  # ============================================================================
+  # DEMO SEEDER - One-shot E2E verification and leaderboard seeding
+  # ============================================================================
+  demo-seeder:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.fastapi
+    image: metivta/demo-seeder:${VERSION:-latest}
+    container_name: metivta-demo-seeder
+    restart: "no"
+    entrypoint: ["python", "-m", "metivta_eval.scripts.seed_demo_stack"]
+    environment:
+      - DEMO_GATEWAY_URL=http://gateway:8000
+      - DEMO_FLASK_URL=http://flask:8080
+      - DEMO_ANSWER_URL=http://demo-answer:5001/answer
+      - DEMO_ANSWER_HEALTH_URL=http://demo-answer:5001/health
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY:-}
+      - LANGSMITH_API_KEY=${LANGCHAIN_API_KEY:-}
+      - METIVTA_MODELS_LANGSMITH_API_KEY=${LANGCHAIN_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - METIVTA_MODELS_ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN:-}
+      - METIVTA_DATASET_NAME=${METIVTA_DATASET_NAME:-}
+      - METIVTA_DATASET_VERSION=${METIVTA_DATASET_VERSION:-}
+      - METIVTA_DATASET_LOCAL_PATH=${METIVTA_DATASET_LOCAL_PATH:-}
+      - METIVTA_DATASET_FILES_QUESTIONS=${METIVTA_DATASET_FILES_QUESTIONS:-}
+      - METIVTA_DATASET_FILES_QUESTIONS_ONLY=${METIVTA_DATASET_FILES_QUESTIONS_ONLY:-}
+      - METIVTA_DATASET_FILES_FORMAT_RUBRIC=${METIVTA_DATASET_FILES_FORMAT_RUBRIC:-}
+      - METIVTA_DATASET_FILES_MATURITY_RUBRIC=${METIVTA_DATASET_FILES_MATURITY_RUBRIC:-}
+      - METIVTA_DATASET_MTEB_CORPUS=${METIVTA_DATASET_MTEB_CORPUS:-}
+      - METIVTA_DATASET_MTEB_QUERIES=${METIVTA_DATASET_MTEB_QUERIES:-}
+      - METIVTA_DATASET_MTEB_QRELS=${METIVTA_DATASET_MTEB_QRELS:-}
+      - METIVTA_EVALUATION_DAAT_ENABLED=${METIVTA_EVALUATION_DAAT_ENABLED:-}
+      - METIVTA_EVALUATION_DAAT_EVALUATORS=${METIVTA_EVALUATION_DAAT_EVALUATORS:-}
+      - HOST_GATEWAY_URL=http://localhost:${GATEWAY_PORT:-18000}
+      - HOST_FASTAPI_DOCS_URL=http://localhost:${GATEWAY_PORT:-18000}/api/v2/docs
+      - HOST_FLASK_LEADERBOARD_URL=http://localhost:${FLASK_PORT:-18080}/leaderboard
+    depends_on:
+      gateway:
+        condition: service_healthy
+      fastapi:
+        condition: service_healthy
+      flask:
+        condition: service_healthy
+      demo-answer:
+        condition: service_healthy
+      worker:
+        condition: service_started
+    networks:
+      - metivta-network
+    profiles:
+      - demo
+
+  # ============================================================================
+  # POSTGRES - Primary Database
+  # ============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: metivta-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-metivta}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-metivta_secret}
+      - POSTGRES_DB=${POSTGRES_DB:-metivta}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-metivta} -d ${POSTGRES_DB:-metivta}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - metivta-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  # ============================================================================
+  # REDIS - Cache & Message Broker
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: metivta-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - metivta-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  # ============================================================================
+  # OBSERVABILITY STACK
+  # ============================================================================
+
+  # Jaeger - Distributed Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:1.54
+    container_name: metivta-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # UI
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - metivta-network
+    profiles:
+      - observability
+
+  # Prometheus - Metrics
+  prometheus:
+    image: prom/prometheus:v2.50.1
+    container_name: metivta-prometheus
+    restart: unless-stopped
+    ports:
+      - "9091:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - metivta-network
+    profiles:
+      - observability
+
+  # Grafana - Dashboards
+  grafana:
+    image: grafana/grafana:10.3.3
+    container_name: metivta-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - metivta-network
+    profiles:
+      - observability
+
+  # Loki - Log Aggregation
+  loki:
+    image: grafana/loki:2.9.4
+    container_name: metivta-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki-data:/loki
+    networks:
+      - metivta-network
+    profiles:
+      - observability
+
+  # Promtail - Log Collector
+  promtail:
+    image: grafana/promtail:2.9.4
+    container_name: metivta-promtail
+    restart: unless-stopped
+    volumes:
+      - ./deploy/promtail.yml:/etc/promtail/config.yml:ro
+      - gateway-logs:/var/log/gateway:ro
+      - fastapi-logs:/var/log/fastapi:ro
+      - flask-logs:/var/log/flask:ro
+      - worker-logs:/var/log/worker:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - metivta-network
+    profiles:
+      - observability
+
+# ============================================================================
+# VOLUMES - Persistent Data Storage
+# ============================================================================
+volumes:
+  postgres-data:
+    name: metivta-postgres-data
+  redis-data:
+    name: metivta-redis-data
+  prometheus-data:
+    name: metivta-prometheus-data
+  grafana-data:
+    name: metivta-grafana-data
+  loki-data:
+    name: metivta-loki-data
+  gateway-logs:
+    name: metivta-gateway-logs
+  fastapi-logs:
+    name: metivta-fastapi-logs
+  flask-logs:
+    name: metivta-flask-logs
+  worker-logs:
+    name: metivta-worker-logs
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+networks:
+  metivta-network:
+    name: metivta-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

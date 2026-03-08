@@ -1,0 +1,289 @@
+# MetivitaEval Central Configuration
+# All services read from this single source of truth
+# Environment variables override with pattern: METIVTA_SECTION_KEY
+# Example: METIVTA_SERVER_PORT=9000
+
+[meta]
+version = "2.0.0"
+environment = "development"  # development | staging | production
+
+# ============================================================================
+# SERVER CONFIGURATION
+# ============================================================================
+[server]
+host = "0.0.0.0"
+port = 8080
+gateway_port = 8000
+fastapi_port = 8001
+workers = 4
+timeout_seconds = 300
+graceful_shutdown_seconds = 30
+
+[server.cors]
+allowed_origins = ["*"]
+allowed_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+allowed_headers = ["*"]
+max_age_seconds = 86400
+
+# ============================================================================
+# SECURITY & mTLS CONFIGURATION
+# ============================================================================
+[security]
+enabled = true
+secret_key = ""  # Override via METIVTA_SECURITY_SECRET_KEY
+
+[security.mtls]
+enabled = false  # Enable in production
+ca_cert_path = "certs/ca.crt"
+server_cert_path = "certs/server.crt"
+server_key_path = "certs/server.key"
+client_cert_required = true
+min_tls_version = "1.3"
+
+[security.jwt]
+enabled = true
+algorithm = "RS256"
+issuer = "metivta-eval"
+audience = "metivta-api"
+access_token_ttl_minutes = 60
+refresh_token_ttl_days = 7
+public_key_path = "certs/jwt_public.pem"
+private_key_path = "certs/jwt_private.pem"
+
+[security.rate_limiting]
+enabled = true
+requests_per_minute = 60
+requests_per_hour = 1000
+burst_size = 10
+storage = "redis"  # memory | redis
+
+[security.api_keys]
+prefix = "mtv_"
+length = 32
+hash_algorithm = "argon2id"
+rotation_days = 90
+
+# ============================================================================
+# DATABASE CONFIGURATION
+# ============================================================================
+[database]
+provider = "postgresql"  # postgresql | supabase | sqlite
+pool_size = 20
+max_overflow = 10
+pool_timeout_seconds = 30
+echo_sql = false
+
+[database.postgresql]
+host = "localhost"
+port = 5432
+database = "metivta"
+user = "metivta"
+password = ""  # Override via METIVTA_DATABASE_POSTGRESQL_PASSWORD
+ssl_mode = "prefer"  # disable | prefer | require | verify-full
+
+[database.supabase]
+url = ""  # Override via METIVTA_DATABASE_SUPABASE_URL
+anon_key = ""  # Override via METIVTA_DATABASE_SUPABASE_ANON_KEY
+service_role_key = ""  # Override via METIVTA_DATABASE_SUPABASE_SERVICE_ROLE_KEY
+
+[database.migrations]
+auto_migrate = true
+directory = "migrations"
+
+# ============================================================================
+# CACHE CONFIGURATION
+# ============================================================================
+[cache]
+provider = "redis"  # memory | redis | memcached
+default_ttl_seconds = 3600
+
+[cache.redis]
+host = "localhost"
+port = 6379
+db = 0
+password = ""  # Override via METIVTA_CACHE_REDIS_PASSWORD
+pool_size = 10
+ssl = false
+
+# ============================================================================
+# AI MODELS CONFIGURATION
+# ============================================================================
+[models]
+primary = "claude-sonnet-4-20250514"
+fast = "claude-sonnet-4-20250514"
+embedding = "text-embedding-3-small"
+
+[models.anthropic]
+api_key = ""  # Override via METIVTA_MODELS_ANTHROPIC_API_KEY
+max_tokens = 4096
+temperature = 0.0
+
+[models.openai]
+api_key = ""  # Override via METIVTA_MODELS_OPENAI_API_KEY
+organization = ""
+
+[models.langsmith]
+api_key = ""  # Override via METIVTA_MODELS_LANGSMITH_API_KEY
+project = "metivta-eval"
+tracing_enabled = true
+
+# ============================================================================
+# EVALUATION CONFIGURATION
+# ============================================================================
+[evaluation]
+target = "endpoint"  # endpoint | anthropic | ground_truth | mock
+endpoint_url = "http://localhost:5001/answer"
+dev_mode = false
+async_enabled = true
+max_concurrent_evaluations = 5
+
+[evaluation.daat]
+enabled = true
+evaluators = ["all"]
+[evaluation.daat.weights]
+dai = 0.60
+mla = 0.40
+
+[evaluation.mteb]
+enabled = true
+batch_size = 100
+metrics = ["ndcg@10", "map@100", "mrr@10", "recall@100", "precision@10"]
+
+[evaluation.web_validator]
+enabled = true
+timeout_ms = 15000
+min_keyword_matches = 15
+concurrency = 5
+cache_enabled = true
+browserless_token = ""  # Override via METIVTA_EVALUATION_WEB_VALIDATOR_BROWSERLESS_TOKEN
+
+# ============================================================================
+# DATASET CONFIGURATION
+# ============================================================================
+[dataset]
+name = "Metivta-Eval"
+version = "1.0"
+local_path = "src/metivta_eval/dataset"
+
+[dataset.files]
+questions = "Q1-holdback.json"
+questions_only = "Q1-questions-only.json"
+holdback = "Q1-holdback.json"
+format_rubric = "format_rubric.json"
+maturity_rubric = "maturity_rubric.json"
+
+[dataset.mteb]
+corpus = "mteb/corpus.jsonl"
+queries = "mteb/queries.jsonl"
+qrels = "mteb/qrels.tsv"
+
+# ============================================================================
+# STORAGE CONFIGURATION (S3-Compatible)
+# ============================================================================
+[storage]
+provider = "local"  # local | s3 | digitalocean_spaces
+local_path = "data"
+
+[storage.s3]
+bucket = "metivta-datasets"
+region = "nyc3"
+endpoint = ""  # For DO Spaces: https://nyc3.digitaloceanspaces.com
+access_key = ""  # Override via METIVTA_STORAGE_S3_ACCESS_KEY
+secret_key = ""  # Override via METIVTA_STORAGE_S3_SECRET_KEY
+cdn_url = ""
+
+# ============================================================================
+# SECRETS MANAGEMENT
+# ============================================================================
+[secrets]
+provider = "env"  # env | vault | onepassword
+
+[secrets.vault]
+address = "http://localhost:8200"
+token = ""  # Override via METIVTA_SECRETS_VAULT_TOKEN
+mount_path = "secret"
+secret_path = "metivta"
+
+[secrets.onepassword]
+vault = "metivta-dev"
+service_account_token = ""  # Override via METIVTA_SECRETS_ONEPASSWORD_SERVICE_ACCOUNT_TOKEN
+
+# ============================================================================
+# OBSERVABILITY CONFIGURATION
+# ============================================================================
+[observability]
+service_name = "metivta-eval"
+
+[observability.logging]
+level = "info"  # debug | info | warn | error
+format = "json"  # json | text
+output = "stdout"  # stdout | file | both
+file_path = "logs/metivta.log"
+max_size_mb = 100
+max_backups = 5
+max_age_days = 30
+compress = true
+
+[observability.tracing]
+enabled = true
+provider = "otlp"  # otlp | jaeger | zipkin
+endpoint = "http://localhost:4317"
+sample_rate = 1.0
+
+[observability.metrics]
+enabled = true
+provider = "prometheus"
+port = 9090
+path = "/metrics"
+
+[observability.sentry]
+enabled = false
+dsn = ""  # Override via METIVTA_OBSERVABILITY_SENTRY_DSN
+environment = "development"
+traces_sample_rate = 0.1
+
+# ============================================================================
+# WORKER CONFIGURATION (Celery)
+# ============================================================================
+[worker]
+enabled = true
+broker = "redis://localhost:6379/1"
+result_backend = "redis://localhost:6379/2"
+concurrency = 4
+prefetch_multiplier = 1
+task_acks_late = true
+task_reject_on_worker_lost = true
+
+[worker.queues]
+default = "metivta.default"
+evaluation = "metivta.evaluation"
+notifications = "metivta.notifications"
+
+# ============================================================================
+# NOTIFICATIONS
+# ============================================================================
+[notifications]
+enabled = false
+
+[notifications.email]
+enabled = false
+smtp_host = ""
+smtp_port = 587
+smtp_user = ""
+smtp_password = ""  # Override via METIVTA_NOTIFICATIONS_EMAIL_SMTP_PASSWORD
+from_address = "noreply@metivta.ai"
+
+[notifications.slack]
+enabled = false
+webhook_url = ""  # Override via METIVTA_NOTIFICATIONS_SLACK_WEBHOOK_URL
+
+# ============================================================================
+# FEATURE FLAGS
+# ============================================================================
+[features]
+mteb_evaluation = true
+async_evaluation = true
+websocket_updates = true
+graphql_api = false
+legacy_flask_routes = true
+new_user_management = true

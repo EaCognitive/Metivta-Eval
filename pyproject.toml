@@ -1,0 +1,72 @@
+[project]
+name = "metivta-eval"
+version = "1.1.0"
+description = "Objective and fair evaluation suite for Torah scholarship Q&A."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "langchain>=0.2.10",
+    "langsmith>=0.1.68",
+    "langchain-anthropic>=0.1.20",
+    "anthropic>=0.34.0",
+    "python-dotenv>=1.0.1",
+    "pyyaml>=6.0.1",
+    "playwright>=1.45.0",
+    "tiktoken>=0.7.0",
+    "pydantic>=2.7.4",
+    "flask>=3.0.0",
+    "flask-cors>=4.0.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+    "requests>=2.31.0",
+    "gunicorn>=21.2.0",
+    "supabase>=2.5.0",
+    "sqlalchemy>=2.0.35",
+    "psycopg[binary]>=3.2.3",
+    "email-validator>=2.2.0",
+    "structlog>=25.0.0",
+    "celery>=5.3.0",
+    "redis>=5.0.0",
+    "beautifulsoup4>=4.12.0",
+    # MTEB evaluation dependencies
+    "pytrec-eval>=0.5",
+    "faiss-cpu>=1.7.4",
+    "sentence-transformers>=2.2.0",
+    "numpy>=1.24.0"
+]
+
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.5.0",
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0",
+    "mypy>=1.8.0",
+    "types-requests>=2.32.0.20250328",
+    "pylint>=4.0.0"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+pythonpath = [".", "src"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "A", "C4", "DTZ", "ISC", "ICN", "PIE", "PT", "RET", "SIM", "ERA"]
+ignore = ["B008", "B905"]
+
+[tool.pylint.main]
+py-version = "3.11"
+jobs = 0
+fail-under = 10
+
+[tool.pylint.format]
+max-line-length = 100

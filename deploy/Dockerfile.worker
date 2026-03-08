@@ -1,0 +1,67 @@
+# MetivitaEval Celery Worker
+# Handles async evaluation tasks
+#
+# Build: docker build -f deploy/Dockerfile.worker -t metivta/worker .
+# Run:   docker run metivta/worker
+
+# ============================================================================
+# STAGE 1: Build with UV
+# ============================================================================
+FROM python:3.12-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+ENV UV_SYSTEM_PYTHON=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+
+WORKDIR /build
+
+COPY pyproject.toml uv.lock* ./
+
+RUN uv sync --frozen --no-dev --no-install-project
+
+COPY src/ ./src/
+COPY api/ ./api/
+
+RUN uv sync --frozen --no-dev
+
+# ============================================================================
+# STAGE 2: Production Runtime
+# ============================================================================
+FROM python:3.12-slim
+
+LABEL org.opencontainers.image.title="MetivitaEval Worker"
+LABEL org.opencontainers.image.description="Celery Background Worker"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --shell /bin/bash metivta
+
+WORKDIR /app
+
+COPY --from=builder /build/.venv /app/.venv
+COPY --from=builder /build/src ./src
+COPY --from=builder /build/api ./api
+COPY config.toml ./config.toml
+
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app/src:/app" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN mkdir -p /app/logs && chown -R metivta:metivta /app
+
+USER metivta
+
+# No port exposed - worker doesn't accept HTTP
+
+ENTRYPOINT ["python", "-m", "celery"]
+
+CMD ["-A", "api.workers.celery_app", "worker", "--loglevel=info", "--concurrency=4"]

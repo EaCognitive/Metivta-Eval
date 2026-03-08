@@ -1,0 +1,95 @@
+# MetivitaEval FastAPI Service
+# Uses UV for fast, reliable Python dependency management
+#
+# Build: docker build -f deploy/Dockerfile.fastapi -t metivta/fastapi .
+# Run:   docker run -p 8001:8001 metivta/fastapi
+
+# ============================================================================
+# STAGE 1: Build with UV
+# ============================================================================
+FROM python:3.12-slim AS builder
+
+# Build arguments
+ARG VERSION=dev
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install UV (fast Python package manager)
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Set UV environment variables
+ENV UV_SYSTEM_PYTHON=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+
+WORKDIR /build
+
+# Copy dependency files
+COPY pyproject.toml uv.lock* ./
+
+# Install dependencies (without dev dependencies)
+RUN uv sync --frozen --no-dev --no-install-project
+
+# Copy source code
+COPY src/ ./src/
+COPY api/ ./api/
+
+# Install the project itself
+RUN uv sync --frozen --no-dev
+
+# ============================================================================
+# STAGE 2: Production Runtime
+# ============================================================================
+FROM python:3.12-slim
+
+# Labels
+LABEL org.opencontainers.image.title="MetivitaEval FastAPI"
+LABEL org.opencontainers.image.description="Python FastAPI Evaluation Service"
+LABEL org.opencontainers.image.vendor="Metivta"
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --shell /bin/bash metivta
+
+# Set working directory
+WORKDIR /app
+
+# Copy virtual environment from builder
+COPY --from=builder --chown=metivta:metivta /build/.venv /app/.venv
+
+# Copy application code
+COPY --from=builder --chown=metivta:metivta /build/src ./src
+COPY --from=builder --chown=metivta:metivta /build/api ./api
+COPY --chown=metivta:metivta config.toml ./config.toml
+
+# Set environment
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app/src:/app" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Create log directory
+RUN mkdir -p /app/logs && chown metivta:metivta /app/logs
+
+# Switch to non-root user
+USER metivta
+
+# Expose port
+EXPOSE 8001
+
+# Health check
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+# Entry point
+ENTRYPOINT ["python", "-m", "uvicorn"]
+
+# Default command
+CMD ["api.fastapi_app.main:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "4"]

@@ -1,0 +1,14 @@
+{
+  "routes": [
+    {
+      "route": "/api/v2/docs",
+      "rewrite": "/api/v2/docs/index.html"
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/api/v2/openapi.json"
+    ]
+  }
+}

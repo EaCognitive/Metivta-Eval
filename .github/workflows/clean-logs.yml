@@ -1,0 +1,23 @@
+name: Artifact Hygiene
+
+on:
+  pull_request:
+  push:
+    branches: [main, master, develop]
+
+jobs:
+  check-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail on tracked local artifacts
+        run: |
+          set -euo pipefail
+          disallowed=$(git ls-files | grep -E '(\.DS_Store$|\.pyc$|browserless_.*|bundled_code\.txt$)' || true)
+          if [ -n "$disallowed" ]; then
+            echo "Disallowed tracked artifacts detected:"
+            echo "$disallowed"
+            exit 1
+          fi
+          echo "No tracked local artifacts detected"

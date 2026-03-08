@@ -1,0 +1,24 @@
+name = "metivta-eval"
+main = "workers/index.js"
+compatibility_date = "2024-01-01"
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+# KV namespace for caching
+[[kv_namespaces]]
+binding = "CACHE"
+id = "your-kv-namespace-id"
+
+# Durable Objects for state management
+[[durable_objects.bindings]]
+name = "EVALUATOR"
+class_name = "EvaluatorDO"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["EvaluatorDO"]
+
+# Secrets (add via wrangler secret put)
+# LANGCHAIN_API_KEY
+# ANTHROPIC_API_KEY

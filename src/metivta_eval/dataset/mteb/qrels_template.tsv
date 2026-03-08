@@ -1,0 +1,11 @@
+query-id	corpus-id	score
+query_001	passage_001	3
+query_001	passage_003	1
+query_002	passage_002	3
+query_002	passage_004	1
+query_003	passage_003	3
+query_003	passage_004	2
+query_004	passage_004	3
+query_004	passage_002	1
+query_005	passage_005	3
+query_005	passage_003	2

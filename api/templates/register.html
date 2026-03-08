@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Registration - Metivta Eval</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #131419;
+            position: relative;
+        }
+        
+        .watermark {
+            position: fixed;
+            top: 5vh;
+            right: 5vw;
+            color: #3a3a3f;
+            font-size: clamp(12px, 1.5vw, 16px);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-weight: 500;
+            z-index: 0;
+        }
+        
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: min(90vw, 500px);
+        }
+        
+        .background-text {
+            margin-top: 15px;
+            align-self: flex-end;
+            margin-right: 10px;
+            font-size: clamp(12px, 1.5vw, 14px);
+            font-weight: 600;
+            color: #00ff88;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            white-space: nowrap;
+            opacity: 0.6;
+            user-select: none;
+            pointer-events: none;
+        }
+        
+        .form {
+            position: relative;
+            width: 100%;
+            padding: clamp(25px, 4vw, 35px) clamp(20px, 4vw, 30px);
+            background: #131419;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: -5px -5px 10px rgba(255, 255, 255, 0.05),
+                5px 5px 15px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+        
+        .form h2 {
+            color: #c7c7c7;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: clamp(20px, 3vh, 30px);
+            font-size: clamp(18px, 2.5vw, 24px);
+        }
+        
+        .input {
+            text-align: left;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: clamp(10px, 2.5vw, 15px);
+            margin-bottom: clamp(12px, 2vh, 18px);
+        }
+        
+        .inputBox {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .inputBox input {
+            width: 100%;
+            height: clamp(45px, 6vh, 50px);
+            background: #131419;
+            border: none;
+            outline: none;
+            border-radius: 25px;
+            padding: 0 clamp(15px, 2.7vw, 20px);
+            font-size: clamp(12px, 1.6vw, 15px);
+            color: #03a9f4;
+            box-shadow: inset -2px -2px 6px rgba(255, 255, 255, 0.05),
+                inset 2px 2px 6px rgba(0, 0, 0, 0.8);
+        }
+        
+        .inputBox input::placeholder {
+            color: #555;
+            font-size: clamp(12px, 1.5vw, 14px);
+        }
+        
+        .inputBox input[type='submit'] {
+            margin-top: clamp(10px, 2vh, 20px);
+            box-shadow: -2px -2px 6px rgba(255, 255, 255, 0.05),
+                2px 2px 6px rgba(0, 0, 0, 0.8);
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-size: clamp(13px, 1.6vw, 15px);
+        }
+        
+        .inputBox input[type='submit']:hover {
+            color: #00ff88;
+            transform: translateY(-1px);
+            box-shadow: -3px -3px 8px rgba(255, 255, 255, 0.07),
+                3px 3px 8px rgba(0, 0, 0, 0.9);
+        }
+        
+        .inputBox input[type='submit']:active {
+            color: #006c9c;
+            transform: translateY(0);
+            box-shadow: inset -2px -2px 6px rgba(255, 255, 255, 0.05),
+                inset 2px 2px 6px rgba(0, 0, 0, 0.8);
+        }
+        
+        .result {
+            margin-top: clamp(15px, 2vh, 20px);
+            padding: clamp(12px, 2vw, 18px);
+            border-radius: 10px;
+            display: none;
+            background: #131419;
+            box-shadow: -3px -3px 7px rgba(255, 255, 255, 0.05),
+                3px 3px 7px rgba(0, 0, 0, 0.5);
+        }
+        
+        .success {
+            border: 1px solid #03a9f4;
+        }
+        
+        .error {
+            border: 1px solid #ff0047;
+        }
+        
+        .result h3 {
+            color: #c7c7c7;
+            margin-bottom: clamp(8px, 1vh, 12px);
+            font-size: clamp(12px, 1.5vw, 14px);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        .result p {
+            color: #868686;
+            margin-bottom: clamp(8px, 1vh, 12px);
+            font-size: clamp(11px, 1.3vw, 13px);
+        }
+        
+        .api-key {
+            background: #131419;
+            padding: clamp(8px, 1.5vw, 12px);
+            border-radius: 40px;
+            font-family: 'Courier New', monospace;
+            margin: clamp(8px, 1.5vh, 12px) 0;
+            color: #03a9f4;
+            box-shadow: inset -2px -2px 6px rgba(255, 255, 255, 0.05),
+                inset 2px 2px 6px rgba(0, 0, 0, 0.8);
+            font-size: clamp(8px, 1vw, 11px);
+            overflow-x: auto;
+            white-space: nowrap;
+            direction: ltr;
+            text-align: left;
+        }
+        
+        .api-key::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .api-key::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 2px;
+        }
+        
+        .api-key::-webkit-scrollbar-thumb {
+            background: #03a9f4;
+            border-radius: 2px;
+        }
+        
+        .warning {
+            color: #ff0047;
+            padding: clamp(6px, 1vh, 10px) 0;
+            margin-top: clamp(8px, 1.5vh, 12px);
+            font-size: clamp(10px, 1.2vw, 12px);
+            text-align: left;
+        }
+        
+        .copy-button {
+            background: #131419;
+            color: #03a9f4;
+            border: none;
+            padding: clamp(5px, 1vw, 8px) clamp(12px, 2vw, 16px);
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: clamp(11px, 1.3vw, 13px);
+            margin-top: clamp(6px, 1vh, 10px);
+            box-shadow: -2px -2px 6px rgba(255, 255, 255, 0.05),
+                2px 2px 6px rgba(0, 0, 0, 0.8);
+            transition: all 0.3s;
+        }
+        
+        .copy-button:active {
+            box-shadow: inset -2px -2px 6px rgba(255, 255, 255, 0.05),
+                inset 2px 2px 6px rgba(0, 0, 0, 0.8);
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: clamp(8px, 1.5vh, 12px);
+            }
+        }
+        
+        @media (max-height: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .form {
+                padding: clamp(15px, 3vw, 25px);
+            }
+        }
+        .lang-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #131419;
+            border: none;
+            color: #03a9f4;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            box-shadow: -2px -2px 6px rgba(255, 255, 255, 0.05),
+                2px 2px 6px rgba(0, 0, 0, 0.8);
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .lang-toggle:hover {
+            color: #00ff88;
+        }
+        
+        .lang-toggle:active {
+            box-shadow: inset -2px -2px 6px rgba(255, 255, 255, 0.05),
+                inset 2px 2px 6px rgba(0, 0, 0, 0.8);
+        }
+        
+        body[dir="rtl"] .lang-toggle {
+            right: auto;
+            left: 15px;
+        }
+        
+        body[dir="rtl"] .background-text {
+            margin-right: 0;
+            margin-left: 10px;
+            align-self: flex-start;
+        }
+        
+        body[dir="rtl"] .input {
+            text-align: right;
+        }
+        
+        body[dir="rtl"] .warning {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="form-container">
+        <div class="form" style="position: relative;">
+        <button class="lang-toggle" onclick="toggleLanguage()" id="langToggle">עב / EN</button>
+        <img src="/static/logo.png" alt="Metivta Eval Logo" style="max-width: 100px; height: auto; margin: 0 auto 15px; display: block; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4)); opacity: 0.85; object-fit: contain;">
+        <h2 data-translate="title">API Registration</h2>
+        
+        <div class="input">
+            <form id="registrationForm">
+                <div class="input-row">
+                    <div class="inputBox">
+                        <input type="text" id="name" name="name" required placeholder="Name" data-placeholder="name">
+                    </div>
+                    <div class="inputBox">
+                        <input type="email" id="email" name="email" required placeholder="Email" data-placeholder="email">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="inputBox">
+                        <input type="text" id="organization" name="organization" required placeholder="Organization" data-placeholder="organization">
+                    </div>
+                    <div class="inputBox">
+                        <input type="text" id="description" name="description" required placeholder="Project Name" data-placeholder="project">
+                    </div>
+                </div>
+                
+                <div class="inputBox">
+                    <input type="submit" id="submitBtn" value="Generate Key" data-value="generate">
+                </div>
+            </form>
+        </div>
+        
+        <div id="result" class="result"></div>
+        
+        </div>
+        <div class="background-text" data-translate="openTorah">The Open Torah</div>
+    </div>
+    
+    <script>
+        let currentLang = 'en';
+        
+        // Translation dictionary
+        const translations = {
+            en: {
+                title: 'API Registration',
+                openTorah: 'The Open Torah',
+                name: 'Name',
+                email: 'Email',
+                organization: 'Organization',
+                project: 'Project Name',
+                generate: 'Generate Key',
+                generating: 'Generating...',
+                registrationComplete: 'Registration Complete',
+                registrationFailed: 'Registration Failed',
+                connectionError: 'Connection Error',
+                couldNotConnect: 'Could not connect to the server.',
+                apiKeyGenerated: 'API key generated:',
+                copyKey: 'Copy Key',
+                copied: 'Copied',
+                noteWarning: 'Note: This key will not be shown again. Save it now.',
+                error: 'Error'
+            },
+            he: {
+                title: 'רישום API',
+                openTorah: 'התורה הפתוחה',
+                name: 'שם',
+                email: 'דוא"ל',
+                organization: 'ארגון',
+                project: 'שם הפרויקט',
+                generate: 'צור מפתח',
+                generating: 'יוצר...',
+                registrationComplete: 'הרישום הושלם',
+                registrationFailed: 'הרישום נכשל',
+                connectionError: 'שגיאת חיבור',
+                couldNotConnect: 'לא ניתן להתחבר לשרת.',
+                apiKeyGenerated: 'מפתח API נוצר:',
+                copyKey: 'העתק מפתח',
+                copied: 'הועתק',
+                noteWarning: 'הערה: מפתח זה לא יוצג שוב. שמור אותו כעת.',
+                error: 'שגיאה'
+            }
+        };
+        
+        // Initialize language from localStorage or browser
+        function initLanguage() {
+            const saved = localStorage.getItem('registerLang');
+            if (saved) {
+                currentLang = saved;
+            } else {
+                // Auto-detect browser language
+                const browserLang = navigator.language || navigator.userLanguage;
+                currentLang = browserLang.startsWith('he') ? 'he' : 'en';
+            }
+            applyLanguage();
+        }
+        
+        // Toggle between languages
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'he' : 'en';
+            localStorage.setItem('registerLang', currentLang);
+            applyLanguage();
+        }
+        
+        // Apply language to all elements
+        function applyLanguage() {
+            // Set RTL direction for Hebrew
+            document.body.dir = currentLang === 'he' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+            
+            // Translate all elements with data-translate attribute
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                }
+            });
+            
+            // Update placeholders
+            document.querySelectorAll('[data-placeholder]').forEach(input => {
+                const key = input.getAttribute('data-placeholder');
+                if (translations[currentLang][key]) {
+                    input.placeholder = translations[currentLang][key];
+                }
+            });
+            
+            // Update submit button
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn && !submitBtn.disabled) {
+                const key = submitBtn.getAttribute('data-value');
+                if (translations[currentLang][key]) {
+                    submitBtn.value = translations[currentLang][key];
+                }
+            }
+        }
+        
+        // Initialize on page load
+        initLanguage();
+    
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const resultDiv = document.getElementById('result');
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.value = translations[currentLang].generating;
+            
+            // Collect form data
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                organization: document.getElementById('organization').value || undefined,
+                description: document.getElementById('description').value || undefined
+            };
+            
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Success - show API key
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h3>${translations[currentLang].registrationComplete}</h3>
+                        <p>${translations[currentLang].apiKeyGenerated}</p>
+                        <div class="api-key" id="apiKey">${data.api_key}</div>
+                        <button class="copy-button" onclick="copyApiKey()">${translations[currentLang].copyKey}</button>
+                        <div class="warning">
+                            ${translations[currentLang].noteWarning}
+                        </div>
+                    `;
+                    resultDiv.style.display = 'block';
+                    
+                    // Reset form
+                    document.getElementById('registrationForm').reset();
+                } else {
+                    // Error
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h3>${translations[currentLang].registrationFailed}</h3>
+                        <p>${data.error || translations[currentLang].error}</p>
+                    `;
+                    resultDiv.style.display = 'block';
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>${translations[currentLang].connectionError}</h3>
+                    <p>${translations[currentLang].couldNotConnect}</p>
+                    <p style="font-size: 12px; margin-top: 10px; color: #555;">${translations[currentLang].error}: ${error.message}</p>
+                `;
+                resultDiv.style.display = 'block';
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.value = translations[currentLang].generate;
+            }
+        });
+        
+        function copyApiKey() {
+            const apiKeyText = document.getElementById('apiKey').textContent;
+            navigator.clipboard.writeText(apiKeyText).then(() => {
+                // Show temporary success message
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = translations[currentLang].copied;
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

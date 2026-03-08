@@ -1,0 +1,108 @@
+---
+title: Authentication
+description: Authentication flows implemented in the current FastAPI service
+---
+
+# Authentication
+
+MetivitaEval FastAPI supports session tokens and API keys.
+
+## 1. Register and Login
+
+Create a user:
+
+```bash
+curl -X POST http://localhost:8001/api/v2/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "name": "User Name",
+    "organization": "My Org",
+    "password": "<your-local-password>"
+  }'
+```
+
+Login to receive tokens:
+
+```bash
+curl -X POST http://localhost:8001/api/v2/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "<your-local-password>"
+  }'
+```
+
+Response:
+
+```json
+{
+  "access_token": "...",
+  "refresh_token": "...",
+  "token_type": "bearer",
+  "expires_in": 3600
+}
+```
+
+## 2. Use Access Token
+
+```bash
+curl http://localhost:8001/api/v2/eval/ \
+  -H "Authorization: Bearer <access_token>"
+```
+
+## 3. Refresh Session
+
+Refresh uses a header, not a JSON body:
+
+```bash
+curl -X POST http://localhost:8001/api/v2/auth/refresh \
+  -H "X-Refresh-Token: <refresh_token>"
+```
+
+## 4. API Keys
+
+Create an API key:
+
+```bash
+curl -X POST http://localhost:8001/api/v2/auth/api-keys \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "CI key",
+    "scopes": ["eval:read", "eval:write", "leaderboard:read"],
+    "expires_in_days": 90
+  }'
+```
+
+Use API key authentication:
+
+```bash
+curl http://localhost:8001/api/v2/leaderboard/ \
+  -H "X-API-Key: <api_key>"
+```
+
+List/revoke keys:
+
+```bash
+curl http://localhost:8001/api/v2/auth/api-keys \
+  -H "Authorization: Bearer <access_token>"
+
+curl -X DELETE http://localhost:8001/api/v2/auth/api-keys/<key_id> \
+  -H "Authorization: Bearer <access_token>"
+```
+
+## 5. Flask Compatibility Auth (`/submit`)
+
+Legacy `/submit` uses API key in Bearer format:
+
+```http
+Authorization: Bearer <api_key>
+```
+
+## Operational Guidance
+
+- Store tokens/keys in secure secret stores.
+- Rotate API keys regularly.
+- Prefer API keys for automation and service-to-service paths.
+- Prefer access tokens for user-interactive workflows.

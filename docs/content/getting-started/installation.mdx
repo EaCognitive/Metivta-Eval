@@ -1,0 +1,75 @@
+---
+title: Installation
+description: Source-first install and local deployment guide
+---
+
+# Installation
+
+## Prerequisites
+
+- Python 3.11+
+- Go 1.22+
+- `uv` (Python package manager)
+- Docker + Docker Compose (for full local stack)
+
+## 1. Clone and Install Python Dependencies
+
+```bash
+git clone https://github.com/metivta/metivta-eval.git
+cd metivta-eval
+uv sync --dev
+uv pip install -e .
+```
+
+## 2. Build CLI Binaries
+
+```bash
+go build -o metivta ./cmd/metivta
+go build -o metivta-gateway ./cmd/metivta-gateway
+```
+
+## 3. Configure Environment
+
+Use templates in the repository root:
+
+- `.env.example`
+- `.env.supabase.example`
+
+Set at minimum:
+
+- `DATABASE_URL`
+- `METIVTA_SECURITY_SECRET_KEY`
+- API provider keys needed for your selected evaluators
+
+## 4. Start Local Stack (Optional, Recommended)
+
+```bash
+docker compose up -d
+```
+
+This starts gateway, FastAPI, Flask compatibility service, worker, PostgreSQL, Redis, and observability services.
+
+## 5. Verify Services
+
+```bash
+curl http://localhost:8001/health
+curl http://localhost:8001/ready
+./metivta version
+```
+
+## 6. Run a First Evaluation
+
+```bash
+METIVTA_API_BASE_URL=http://localhost:8001 \
+./metivta eval run \
+  --endpoint https://your-system.example.com/answer \
+  --mode daat \
+  --dataset Metivta-Eval \
+  --system-name my-system
+```
+
+Next references:
+
+- [API Overview](/api/overview)
+- [CLI Overview](/cli/overview)
+- [Configuration](/configuration/overview)

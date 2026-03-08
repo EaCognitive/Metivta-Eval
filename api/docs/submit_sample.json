@@ -1,0 +1,38 @@
+{
+  "description": "Sample showing what your endpoint will receive and must return",
+  "note": "Your endpoint will be called once for each evaluation question",
+  
+  "example_request": {
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "question": "What is the source for lighting Shabbat candles?"
+    }
+  },
+  
+  "required_response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "answer": "The obligation to light Shabbat candles is derived from the Talmud in Tractate Shabbat 25b. The Gemara discusses how lighting candles ensures שלום בית (peace in the home) by providing light for the Shabbat meals. The Rambam codifies this in Hilchot Shabbat 5:1, stating it is a rabbinic obligation. The practice is also mentioned in the Shulchan Aruch, Orach Chaim 263:1-3, which details the proper time and method for lighting. See also the commentary of the Mishnah Berurah 263:1 for additional insights on the spiritual significance."
+    }
+  },
+  
+  "important_notes": [
+    "Your endpoint must respond within 30 seconds",
+    "Response must be valid JSON with an 'answer' field",
+    "Include Hebrew text where relevant for better DAAT scores",
+    "Include sources and references for better scholarly format scores",
+    "Provide comprehensive answers for better response length scores",
+    "Your endpoint will be called 100 times (once per question)"
+  ],
+  
+  "test_your_endpoint": {
+    "description": "Before submitting, test your endpoint with this curl command",
+    "command": "curl -X POST YOUR_ENDPOINT_URL -H 'Content-Type: application/json' -d '{\"question\": \"Test question?\"}'"
+  }
+}

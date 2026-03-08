@@ -1,0 +1,78 @@
+---
+title: CLI Overview
+description: Current command reference for the metivta CLI
+---
+
+# CLI Overview
+
+The `metivta` CLI is implemented in `cmd/metivta` and currently supports evaluation operations, leaderboard access, dataset utilities, local server control, configuration, and logs.
+
+## Build and Run
+
+```bash
+go build -o metivta ./cmd/metivta
+./metivta version
+```
+
+## Global Flags
+
+| Flag | Description |
+|---|---|
+| `--config <path>` | Config file path |
+| `--output <table|json|yaml>` | Output format |
+| `--verbose` | Verbose output |
+
+## Commands
+
+### `eval`
+
+- `metivta eval run --endpoint <url> [--mode daat|mteb] [--dataset <name>] [--async] [--system-name <name>] [--system-version <ver>]`
+- `metivta eval status <eval-id>`
+- `metivta eval list [--status <status>] [--mode <mode>] [--limit <n>]`
+
+### `leaderboard`
+
+- `metivta leaderboard` (opens TUI)
+- `metivta leaderboard show [--mode all|daat|mteb] [--limit <n>]`
+- `metivta leaderboard export --format csv|json --output <file> [--mode all|daat|mteb]`
+
+### `dataset`
+
+- `metivta dataset list`
+- `metivta dataset validate <file>`
+
+### `server`
+
+- `metivta server start [--port <n>]`
+- `metivta server status`
+- `metivta server stop`
+
+### `config`
+
+- `metivta config init`
+- `metivta config get <key>`
+- `metivta config list`
+
+### `logs`
+
+- `metivta logs tail [--follow] [--level <level>] [--lines <n>]`
+- `metivta logs search <query>`
+
+### `version`
+
+- `metivta version`
+
+## API Target Configuration
+
+CLI API calls default to `http://127.0.0.1:8001` unless overridden.
+
+Override precedence:
+
+1. `METIVTA_API_BASE_URL`
+2. `server.api_base_url` in config
+3. computed from `server.host` and `server.fastapi_port`
+
+Optional API key for CLI HTTP calls:
+
+- `METIVTA_API_KEY`
+- or `security.api_key` in config

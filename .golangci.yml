@@ -1,0 +1,25 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: false
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - misspell
+    - unconvert
+  settings:
+    errcheck:
+      check-type-assertions: true
+
+    misspell:
+      locale: US
+
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 10
